@@ -4,6 +4,7 @@
     "includes": [
       "**",
       "!dist",
+      "!masterbelt-source",
       "!node_modules",
       "!src/generated/spec",
       "!src/generated/code-highlights.json",
