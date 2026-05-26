@@ -431,15 +431,26 @@ function isEditableTarget(target: EventTarget | null) {
 }
 
 function getSectionNavigation(currentSpec: Spec) {
+  const firstSpec = hasManifestSection(currentSpec)
+    ? specs.find((item) => item.sectionIndex === currentSpec.sectionIndex)
+    : undefined;
+
+  if (firstSpec && firstSpec.path !== currentSpec.path) {
+    return {
+      label: currentSpec.sectionTitle,
+      route: firstSpec.route,
+    };
+  }
+
   const section = currentSpec.segments[0];
   if (!section || currentSpec.segments.length < 2) return undefined;
 
-  const firstSpec = specs.find((item) => item.segments[0] === section);
-  if (!firstSpec) return undefined;
+  const firstPathSpec = specs.find((item) => item.segments[0] === section);
+  if (!firstPathSpec) return undefined;
 
   return {
     label: formatSegmentLabel(section),
-    route: firstSpec.route,
+    route: firstPathSpec.route,
   };
 }
 
@@ -484,6 +495,18 @@ function formatSegmentLabel(segment: string) {
 }
 
 function getSiblingNavigation(currentSpec: Spec) {
+  const manifestSiblings = hasManifestSection(currentSpec)
+    ? specs.filter((item) => item.sectionIndex === currentSpec.sectionIndex)
+    : [];
+  const manifestIndex = manifestSiblings.findIndex((item) => item.path === currentSpec.path);
+
+  if (manifestIndex >= 0) {
+    return {
+      previous: manifestIndex > 0 ? manifestSiblings[manifestIndex - 1] : undefined,
+      next: manifestIndex < manifestSiblings.length - 1 ? manifestSiblings[manifestIndex + 1] : undefined,
+    };
+  }
+
   const currentDirectory = currentSpec.path.split("/").slice(0, -1).join("/");
   const siblings = specs.filter((item) => item.path.split("/").slice(0, -1).join("/") === currentDirectory);
   const index = siblings.findIndex((item) => item.path === currentSpec.path);
@@ -492,6 +515,10 @@ function getSiblingNavigation(currentSpec: Spec) {
     previous: index > 0 ? siblings[index - 1] : undefined,
     next: index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : undefined,
   };
+}
+
+function hasManifestSection(spec: Spec) {
+  return spec.sectionIndex < 999999;
 }
 
 function SpecPager({ next, previous }: { next?: Spec; previous?: Spec }) {

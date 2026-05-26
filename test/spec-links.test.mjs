@@ -10,11 +10,6 @@ const specDir = path.join(rootDir, "src/generated/spec");
 const specsByPath = new Map(manifest.specs.map((spec) => [spec.path, spec]));
 const markdownByPath = new Map();
 const headingIdsByPath = new Map();
-const knownBrokenLinks = new Set([
-  "language/builtins.md: #reserved-built-in-names -> missing #reserved-built-in-names in language/builtins.md",
-  "masterdata/schema.md: #scope-chaining -> missing #scope-chaining in masterdata/schema.md",
-  "masterdata/schema.md: export-sqlite.md#indexed-scope-secondary-indexes -> missing #indexed-scope-secondary-indexes in masterdata/export-sqlite.md",
-]);
 
 for (const spec of manifest.specs) {
   const markdown = await fs.readFile(path.join(specDir, spec.path), "utf8");
@@ -32,12 +27,12 @@ test("spec markdown links point to existing generated spec pages and headings", 
       if (!resolved) continue;
 
       if (!specsByPath.has(resolved.path)) {
-        addBrokenLink(brokenLinks, `${spec.path}: ${href} -> missing ${resolved.path}`);
+        brokenLinks.push(`${spec.path}: ${href} -> missing ${resolved.path}`);
         continue;
       }
 
       if (resolved.hash && !headingIdsByPath.get(resolved.path)?.has(resolved.hash)) {
-        addBrokenLink(brokenLinks, `${spec.path}: ${href} -> missing #${resolved.hash} in ${resolved.path}`);
+        brokenLinks.push(`${spec.path}: ${href} -> missing #${resolved.hash} in ${resolved.path}`);
       }
     }
   }
@@ -56,12 +51,6 @@ function extractMarkdownLinks(markdown) {
   }
 
   return links;
-}
-
-function addBrokenLink(brokenLinks, message) {
-  if (!knownBrokenLinks.has(message)) {
-    brokenLinks.push(message);
-  }
 }
 
 function resolveSpecHref(href, currentPath) {

@@ -1,5 +1,16 @@
 import manifest from "../generated/spec-manifest.json";
 
+type SpecSection = {
+  documents: {
+    path: string;
+    route: string;
+    title: string;
+  }[];
+  index: number;
+  title: string;
+};
+
+const manifestWithSections = manifest as typeof manifest & { sections?: SpecSection[] };
 const markdownModules = import.meta.glob("../generated/spec/**/*.md", {
   query: "?raw",
   import: "default",
@@ -19,8 +30,9 @@ export type SpecNavRow =
 
 export const specs = manifest.specs;
 export const source = manifest.source;
+export const specSections = manifestWithSections.sections ?? [];
 export const codeHighlights = codeHighlightModules["../generated/code-highlights.json"] ?? {};
-export const specNavRows = buildSpecNavRows(specs);
+export const specNavRows = buildSpecNavRows(specs, specSections);
 
 export function getSelectedSpec(pathname: string) {
   if (pathname === "/spec" || pathname === "/spec/") {
@@ -34,7 +46,11 @@ export function getMarkdown(spec: Spec | undefined) {
   return spec ? markdownModules[`../generated/spec/${spec.path}`] : undefined;
 }
 
-function buildSpecNavRows(items: Spec[]): SpecNavRow[] {
+function buildSpecNavRows(items: Spec[], sections: SpecSection[]): SpecNavRow[] {
+  if (sections.length > 0) {
+    return buildSpecNavRowsFromSections(items, sections);
+  }
+
   const rows: SpecNavRow[] = [];
   const seenSections = new Set<string>();
 
@@ -63,6 +79,36 @@ function buildSpecNavRows(items: Spec[]): SpecNavRow[] {
       spec: item,
       depth: directories.length,
     });
+  }
+
+  return rows;
+}
+
+function buildSpecNavRowsFromSections(items: Spec[], sections: SpecSection[]): SpecNavRow[] {
+  const rows: SpecNavRow[] = [];
+  const specsByPath = new Map(items.map((item) => [item.path, item]));
+
+  for (const section of sections) {
+    const firstDocument = section.documents[0];
+    rows.push({
+      type: "section",
+      key: `section:${section.index}`,
+      label: section.title,
+      route: firstDocument?.route ?? "#",
+      depth: 0,
+    });
+
+    for (const document of section.documents) {
+      const spec = specsByPath.get(document.path);
+      if (!spec) continue;
+
+      rows.push({
+        type: "spec",
+        key: `spec:${spec.path}`,
+        spec,
+        depth: 1,
+      });
+    }
   }
 
   return rows;

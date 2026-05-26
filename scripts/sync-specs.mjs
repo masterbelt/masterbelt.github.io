@@ -2,12 +2,12 @@ import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
-import { compareSpecRelativePaths } from "./spec-order.mjs";
 
 const execFileAsync = promisify(execFile);
 const repoArg = process.argv[2] ?? "../masterbelt";
 const repoDir = path.resolve(process.cwd(), repoArg);
 const specDir = path.join(repoDir, "spec");
+const sourceManifestPath = path.join(specDir, "manifest.json");
 const syntaxDir = path.join(repoDir, "internal/masterbelt/syntax");
 const treeSitterCli = path.join(syntaxDir, "node_modules/.bin/tree-sitter");
 const outputDir = path.resolve(process.cwd(), "src/generated/spec");
@@ -19,6 +19,9 @@ await fs.rm(outputDir, { recursive: true, force: true });
 await fs.mkdir(outputDir, { recursive: true });
 await fs.mkdir(path.dirname(highlightsPath), { recursive: true });
 
+const sourceManifest = await readSourceManifest(sourceManifestPath);
+const manifestDocuments = sourceManifest ? flattenManifestDocuments(sourceManifest) : [];
+const manifestDocumentsByPath = new Map(manifestDocuments.map((document) => [document.path, document]));
 const files = await collectMarkdownFiles(specDir);
 const commit = await gitOutput(repoDir, ["rev-parse", "HEAD"]);
 const shortCommit = await gitOutput(repoDir, ["rev-parse", "--short", "HEAD"]);
@@ -32,18 +35,22 @@ for (const sourcePath of files) {
   const content = await fs.readFile(sourcePath, "utf8");
   const outputPath = path.join(outputDir, relativePath);
   const slug = slugFromPath(relativePath);
+  const manifestDocument = manifestDocumentsByPath.get(relativePath);
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, content);
 
   specs.push({
-    title: extractTitle(content) ?? titleFromPath(relativePath),
+    title: manifestDocument?.title ?? extractTitle(content) ?? titleFromPath(relativePath),
     slug,
     path: relativePath,
     route: slug ? `/spec/${slug}/` : "/spec/",
     markdownUrl: `/spec-src/${relativePath}`,
     sourceUrl: `https://github.com/masterbelt/masterbelt/blob/main/spec/${relativePath}`,
     segments: slug ? slug.split("/") : [],
+    sectionTitle: manifestDocument?.sectionTitle ?? sectionTitleFromPath(relativePath),
+    sectionIndex: manifestDocument?.sectionIndex ?? 999999,
+    documentIndex: manifestDocument?.documentIndex ?? 999999,
   });
 
   const highlightedBlocks = await highlightMasterbeltBlocks(content);
@@ -61,6 +68,9 @@ const manifest = {
     shortCommit,
     syncedAt,
   },
+  title: sourceManifest?.title ?? "Masterbelt Specification",
+  description: sourceManifest?.description,
+  sections: buildGeneratedSections(sourceManifest, specs),
   specs,
 };
 
@@ -88,6 +98,57 @@ async function collectMarkdownFiles(dir) {
   );
 
   return nested.flat().sort(compareSpecPaths);
+}
+
+async function readSourceManifest(filePath) {
+  try {
+    return JSON.parse(await fs.readFile(filePath, "utf8"));
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
+
+function flattenManifestDocuments(sourceManifest) {
+  return sourceManifest.sections.flatMap((section, sectionIndex) =>
+    section.documents.map((document, documentIndex) => ({
+      ...document,
+      sectionTitle: section.title,
+      sectionIndex,
+      documentIndex,
+    })),
+  );
+}
+
+function buildGeneratedSections(sourceManifest, generatedSpecs) {
+  if (!sourceManifest) {
+    return [];
+  }
+
+  const specsByPath = new Map(generatedSpecs.map((spec) => [spec.path, spec]));
+
+  return sourceManifest.sections
+    .map((section, sectionIndex) => ({
+      title: section.title,
+      index: sectionIndex,
+      documents: section.documents
+        .map((document, documentIndex) => {
+          const spec = specsByPath.get(document.path);
+          if (!spec) return undefined;
+
+          return {
+            path: spec.path,
+            title: spec.title,
+            route: spec.route,
+            index: documentIndex,
+          };
+        })
+        .filter(Boolean),
+    }))
+    .filter((section) => section.documents.length > 0);
 }
 
 async function gitOutput(cwd, args) {
@@ -181,6 +242,30 @@ function slugFromPath(filePath) {
 function compareSpecPaths(left, right) {
   const leftRelative = toPosix(path.relative(specDir, left));
   const rightRelative = toPosix(path.relative(specDir, right));
+  const leftDocument = manifestDocumentsByPath.get(leftRelative);
+  const rightDocument = manifestDocumentsByPath.get(rightRelative);
 
-  return compareSpecRelativePaths(leftRelative, rightRelative);
+  if (leftDocument && rightDocument) {
+    if (leftDocument.sectionIndex !== rightDocument.sectionIndex) {
+      return leftDocument.sectionIndex - rightDocument.sectionIndex;
+    }
+
+    if (leftDocument.documentIndex !== rightDocument.documentIndex) {
+      return leftDocument.documentIndex - rightDocument.documentIndex;
+    }
+  }
+
+  if (leftDocument) return -1;
+  if (rightDocument) return 1;
+
+  return leftRelative.localeCompare(rightRelative);
+}
+
+function sectionTitleFromPath(filePath) {
+  if (filePath === "README.md") {
+    return "Overview";
+  }
+
+  const [segment] = filePath.split("/");
+  return titleFromPath(segment);
 }
