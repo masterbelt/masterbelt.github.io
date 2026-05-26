@@ -21,11 +21,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ spec, markdown 
             </MarkdownLink>
           ),
           code: CodeBlockForSpec,
-          h1: ({ children }) => (
-            <Heading level={1} slugger={headingSlugger}>
-              {children}
-            </Heading>
-          ),
+          h1: () => null,
           h2: ({ children }) => (
             <Heading level={2} slugger={headingSlugger}>
               {children}

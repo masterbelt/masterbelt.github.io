@@ -6,26 +6,19 @@ import { type Spec, source, specNavRows } from "../data/specs";
 import { extractHeadings } from "../lib/markdown";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
-  const headings = useMemo(() => extractHeadings(markdown), [markdown]);
+  const headings = useMemo(() => extractHeadings(markdown).filter((heading) => heading.level > 1), [markdown]);
   const desktopSpecNavRef = useRef<HTMLElement | null>(null);
   const desktopCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
+  const mobileSpecNavRef = useRef<HTMLElement | null>(null);
+  const mobileCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
   const headingsNavRef = useRef<HTMLElement | null>(null);
   const activeHeadingIdRef = useRef(headings[0]?.id ?? "");
   const [activeHeadingId, setActiveHeadingId] = useState(headings[0]?.id ?? "");
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: this effect intentionally runs when the selected spec changes
   useEffect(() => {
-    if (!window.matchMedia("(min-width: 1024px)").matches) return;
-
-    const nav = desktopSpecNavRef.current;
-    const navItem = desktopCurrentNavItemRef.current;
-    if (!nav || !navItem) return;
-
-    const targetTop = navItem.offsetTop - nav.clientHeight / 2 + navItem.clientHeight / 2;
-    nav.scrollTo({
-      top: Math.max(0, targetTop),
-      behavior: "auto",
-    });
+    scrollNavItemToCenter(desktopSpecNavRef.current, desktopCurrentNavItemRef.current);
+    scrollNavItemToCenter(mobileSpecNavRef.current, mobileCurrentNavItemRef.current);
   }, [spec.path]);
 
   useEffect(() => {
@@ -120,7 +113,6 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
         <article className="min-w-0">
           <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-5">
-            <p className="mb-2 text-xs font-bold uppercase text-teal-700">masterbelt/masterbelt</p>
             <h1 className="m-0 text-5xl font-black leading-tight">{spec.title}</h1>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-600">
               <span>Synced from main@{source.shortCommit || "local"}</span>
@@ -140,11 +132,31 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
         <section className="overflow-hidden border-l border-zinc-300 bg-white lg:hidden">
           <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
-          <SpecNavigation ariaLabel="Other spec pages" currentSpecPath={spec.path} maxHeightClassName="max-h-[52vh]" />
+          <SpecNavigation
+            ariaLabel="Other spec pages"
+            currentNavItemRef={mobileCurrentNavItemRef}
+            currentSpecPath={spec.path}
+            maxHeightClassName="max-h-[52vh]"
+            navRef={mobileSpecNavRef}
+          />
         </section>
       </div>
     </section>
   );
+}
+
+function scrollNavItemToCenter(nav: HTMLElement | null, navItem: HTMLElement | null) {
+  if (!nav || !navItem || nav.offsetParent === null || navItem.offsetParent === null) return;
+
+  const navRect = nav.getBoundingClientRect();
+  const navItemRect = navItem.getBoundingClientRect();
+  const targetTop = nav.scrollTop + navItemRect.top - navRect.top - nav.clientHeight / 2 + navItem.clientHeight / 2;
+  const maxTop = Math.max(0, nav.scrollHeight - nav.clientHeight);
+
+  nav.scrollTo({
+    top: Math.min(maxTop, Math.max(0, targetTop)),
+    behavior: "auto",
+  });
 }
 
 function SpecNavigation({
