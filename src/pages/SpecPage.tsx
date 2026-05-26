@@ -76,7 +76,9 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   return (
     <section className="border-t border-zinc-200">
       <div className="mx-auto grid w-[min(1280px,calc(100%-32px))] grid-cols-1 gap-10 py-10 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="grid gap-4 lg:sticky lg:top-4 lg:self-start">
+        <aside className="grid gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:grid-rows-[auto_auto_minmax(0,1fr)] lg:self-start">
+          <SpecSearch currentSpecPath={spec.path} />
+
           {hasHeadings ? (
             <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
               <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">On this page</div>
@@ -104,15 +106,13 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
             </section>
           ) : null}
 
-          <SpecSearch currentSpecPath={spec.path} />
-
-          <section className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white lg:block">
+          <section className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white lg:flex lg:min-h-0 lg:flex-col">
             <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
             <SpecNavigation
               ariaLabel="Spec pages"
               currentNavItemRef={desktopCurrentNavItemRef}
               currentSpecPath={spec.path}
-              maxHeightClassName="max-h-[calc(70vh-156px)]"
+              maxHeightClassName="min-h-0 flex-1"
               navRef={desktopSpecNavRef}
             />
           </section>
@@ -136,8 +136,8 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
           </div>
 
           <MarkdownRenderer spec={spec} markdown={markdown} />
-          <SectionBackLink sectionNavigation={sectionNavigation} />
           <SpecPager next={siblingNavigation.next} previous={siblingNavigation.previous} />
+          <SectionBackLink sectionNavigation={sectionNavigation} />
         </article>
 
         <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white lg:hidden">
@@ -161,7 +161,7 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
   const hasQuery = query.trim().length >= 2;
 
   return (
-    <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+    <section className="relative overflow-visible rounded-lg border border-zinc-200 bg-white">
       <label className="block px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600" htmlFor="spec-search">
         Search
       </label>
@@ -179,25 +179,28 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
         </div>
       </div>
       {hasQuery ? (
-        <div className="grid max-h-80 gap-1 overflow-auto px-2 pb-3 text-sm">
-          {results.length > 0 ? (
-            results.map((result) => (
-              <a
-                key={result.spec.path}
-                className={`rounded-md px-3 py-2 no-underline ${
-                  result.spec.path === currentSpecPath
-                    ? "bg-teal-900 text-white"
-                    : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
-                }`}
-                href={result.spec.route}
-              >
-                <span className="block font-bold">{result.spec.title}</span>
-                {result.excerpt ? <span className="mt-1 block text-xs opacity-75">{result.excerpt}</span> : null}
-              </a>
-            ))
-          ) : (
-            <p className="m-0 px-3 py-2 text-sm text-zinc-500">No matching specs.</p>
-          )}
+        <div className="absolute top-[calc(100%+0.5rem)] right-0 left-0 z-20 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg">
+          <div className="grid max-h-80 gap-1 overflow-auto p-2 text-sm">
+            {results.length > 0 ? (
+              results.map((result) => (
+                <a
+                  key={result.spec.path}
+                  className={`rounded-md px-3 py-2 no-underline ${
+                    result.spec.path === currentSpecPath
+                      ? "bg-teal-900 text-white"
+                      : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+                  }`}
+                  href={result.spec.route}
+                  onClick={() => setQuery("")}
+                >
+                  <span className="block font-bold">{result.spec.title}</span>
+                  {result.excerpt ? <span className="mt-1 block text-xs opacity-75">{result.excerpt}</span> : null}
+                </a>
+              ))
+            ) : (
+              <p className="m-0 px-3 py-2 text-sm text-zinc-500">No matching specs.</p>
+            )}
+          </div>
         </div>
       ) : null}
     </section>
