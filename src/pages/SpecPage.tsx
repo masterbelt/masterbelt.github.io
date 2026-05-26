@@ -303,8 +303,12 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
         </div>
       </div>
       {isOpen ? (
-        <div className="absolute top-[calc(100%+0.5rem)] right-0 left-0 z-20 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg">
-          <div id={resultsId} className="grid max-h-80 gap-1 overflow-auto p-2 text-sm" role="listbox">
+        <div className="fixed top-24 right-4 left-4 z-30 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-xl lg:absolute lg:top-[calc(100%+0.5rem)] lg:right-0 lg:left-0 lg:z-20 lg:shadow-lg">
+          <div
+            id={resultsId}
+            className="grid max-h-[min(70vh,32rem)] gap-1 overflow-auto p-2 text-sm lg:max-h-80"
+            role="listbox"
+          >
             {results.length > 0 ? (
               results.map((result, index) => {
                 const isActive = index === activeIndex;
