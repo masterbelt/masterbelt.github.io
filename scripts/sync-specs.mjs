@@ -48,7 +48,7 @@ for (const sourcePath of files) {
     path: relativePath,
     route: slug ? `/spec/${slug}/` : "/spec/",
     markdownUrl: `/spec-src/${relativePath}`,
-    sourceUrl: `https://github.com/masterbelt/masterbelt/blob/main/spec/${relativePath}`,
+    sourceUrl: `https://github.com/masterbelt/masterbelt/blob/${commit}/spec/${relativePath}`,
     segments: slug ? slug.split("/") : [],
     sectionTitle: manifestDocument?.sectionTitle ?? sectionTitleFromPath(relativePath),
     sectionIndex: manifestDocument?.sectionIndex ?? 999999,
