@@ -4,6 +4,8 @@
 
 Static documentation site for Masterbelt, published at <https://masterbelt.dev/>.
 
+The site is deployed with GitHub Pages and uses `masterbelt.dev` as its custom domain.
+
 ## Development
 
 ```sh
