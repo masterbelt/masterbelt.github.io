@@ -1,4 +1,4 @@
-import { type KeyboardEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent as ReactKeyboardEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaGithub, FaMagnifyingGlass } from "react-icons/fa6";
 import { LuFileText } from "react-icons/lu";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
@@ -189,6 +189,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
 function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
   const searchRef = useRef<HTMLElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const resultsListRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SpecSearchResult[]>([]);
@@ -229,6 +230,23 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
   }, []);
 
   useEffect(() => {
+    const focusSearchOnSlash = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey || isEditableTarget(event.target)) {
+        return;
+      }
+
+      event.preventDefault();
+      searchInputRef.current?.focus();
+    };
+
+    document.addEventListener("keydown", focusSearchOnSlash);
+
+    return () => {
+      document.removeEventListener("keydown", focusSearchOnSlash);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isOpen || !activeResult) return;
 
     const list = resultsListRef.current;
@@ -249,7 +267,7 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
     setActiveIndex(-1);
   };
 
-  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Escape") {
       setIsSearchOpen(false);
       setActiveIndex(-1);
@@ -292,6 +310,7 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
         <div className="flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 focus-within:border-teal-700">
           <FaMagnifyingGlass className="shrink-0 text-zinc-400" aria-hidden="true" size={13} />
           <input
+            ref={searchInputRef}
             id="spec-search"
             className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-zinc-400"
             type="search"
@@ -376,6 +395,13 @@ function scrollElementIntoContainer(element: HTMLElement, container: HTMLElement
   if (elementBottom > visibleBottom) {
     container.scrollTo({ top: elementBottom - container.clientHeight, behavior: "auto" });
   }
+}
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+
+  const tagName = target.tagName.toLowerCase();
+  return target.isContentEditable || tagName === "input" || tagName === "textarea" || tagName === "select";
 }
 
 function getSectionNavigation(currentSpec: Spec) {
