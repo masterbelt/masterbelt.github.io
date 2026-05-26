@@ -24,10 +24,7 @@ for (const spec of manifest.specs) {
   const routeDir = path.join(distDir, spec.route);
   const markdown = await fs.readFile(path.join(generatedSpecDir, spec.path), "utf8");
   const appHtml = render(spec.route);
-  const html = withRenderedApp(
-    withPageMetadata(indexHtml, buildSpecMetadata({ siteUrl, spec, markdown })),
-    appHtml,
-  );
+  const html = withRenderedApp(withPageMetadata(indexHtml, buildSpecMetadata({ siteUrl, spec, markdown })), appHtml);
 
   await fs.mkdir(routeDir, { recursive: true });
   await fs.writeFile(path.join(routeDir, "index.html"), html);

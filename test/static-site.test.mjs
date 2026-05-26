@@ -20,7 +20,7 @@ const shellHtml = `<!doctype html>
 </html>`;
 
 test("withRenderedApp injects prerendered HTML into the root", () => {
-  const rendered = withRenderedApp(shellHtml, '<main><h1>Syntax Structure</h1></main>');
+  const rendered = withRenderedApp(shellHtml, "<main><h1>Syntax Structure</h1></main>");
 
   assert.match(rendered, /<div id="root"><main><h1>Syntax Structure<\/h1><\/main><\/div>/);
   assert.doesNotMatch(rendered, /<div id="root"><\/div>/);

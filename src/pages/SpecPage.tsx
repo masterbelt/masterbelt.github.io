@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { source, specNavRows, type Spec } from "../data/specs";
-import { extractHeadings } from "../lib/markdown";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
+import { type Spec, source, specNavRows } from "../data/specs";
+import { extractHeadings } from "../lib/markdown";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
-  const headings = extractHeadings(markdown);
+  const headings = useMemo(() => extractHeadings(markdown), [markdown]);
   const currentNavItemRef = useRef<HTMLAnchorElement | null>(null);
   const headingsNavRef = useRef<HTMLElement | null>(null);
   const activeHeadingIdRef = useRef(headings[0]?.id ?? "");
   const [activeHeadingId, setActiveHeadingId] = useState(headings[0]?.id ?? "");
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: this effect intentionally runs when the selected spec changes
   useEffect(() => {
     currentNavItemRef.current?.scrollIntoView({
       block: "center",
@@ -50,7 +51,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
       window.removeEventListener("scroll", updateActiveHeading);
       window.removeEventListener("resize", updateActiveHeading);
     };
-  }, [spec.path, markdown]);
+  }, [headings]);
 
   useEffect(() => {
     const nav = headingsNavRef.current;
@@ -97,7 +98,10 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
           <section>
             <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
-            <nav className="grid max-h-[calc(70vh-156px)] gap-1 overflow-auto px-2 pb-3 text-sm" aria-label="Spec pages">
+            <nav
+              className="grid max-h-[calc(70vh-156px)] gap-1 overflow-auto px-2 pb-3 text-sm"
+              aria-label="Spec pages"
+            >
               {specNavRows.map((row) =>
                 row.type === "section" ? (
                   <div
@@ -133,8 +137,12 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
             <h1 className="m-0 text-5xl font-black leading-tight">{spec.title}</h1>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-600">
               <span>Synced from main@{source.shortCommit || "local"}</span>
-              <a className="text-teal-900" href={spec.markdownUrl}>Markdown</a>
-              <a className="text-teal-900" href={spec.sourceUrl}>Source</a>
+              <a className="text-teal-900" href={spec.markdownUrl}>
+                Markdown
+              </a>
+              <a className="text-teal-900" href={spec.sourceUrl}>
+                Source
+              </a>
             </div>
           </div>
 

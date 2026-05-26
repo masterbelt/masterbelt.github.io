@@ -1,6 +1,6 @@
 import GithubSlugger from "github-slugger";
 import type { ReactNode } from "react";
-import { specs, type Spec } from "../data/specs";
+import { type Spec, specs } from "../data/specs";
 
 export type HeadingInfo = {
   id: string;
@@ -12,15 +12,16 @@ export function extractHeadings(markdown: string): HeadingInfo[] {
   const slugger = new GithubSlugger();
   const headings: HeadingInfo[] = [];
   const pattern = /^(#{1,6})\s+(.+)$/gm;
-  let match;
+  let match = pattern.exec(markdown);
 
-  while ((match = pattern.exec(markdown))) {
+  while (match) {
     const text = stripMarkdownInline(match[2].trim());
     headings.push({
       id: slugger.slug(text),
       level: match[1].length,
       text,
     });
+    match = pattern.exec(markdown);
   }
 
   return headings;

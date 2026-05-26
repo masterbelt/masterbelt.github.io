@@ -58,6 +58,9 @@ jobs:
       - name: Generate specs
         run: pnpm generate:spec masterbelt-source
 
+      - name: Check formatting and lint
+        run: pnpm biome:check
+
       - name: Test
         run: pnpm test
 

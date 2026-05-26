@@ -1,7 +1,6 @@
+import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
@@ -119,14 +118,16 @@ function toPosix(value) {
 async function highlightMasterbeltBlocks(content) {
   const blocks = [];
   const fencePattern = /^```(\w+)\n([\s\S]*?)^```/gm;
-  let match;
+  let match = fencePattern.exec(content);
 
-  while ((match = fencePattern.exec(content))) {
+  while (match) {
     if (match[1] !== "mst") {
+      match = fencePattern.exec(content);
       continue;
     }
 
     blocks.push(await highlightMasterbeltCode(match[2].replace(/\n$/, "")));
+    match = fencePattern.exec(content);
   }
 
   return blocks;

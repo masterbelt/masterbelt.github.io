@@ -15,14 +15,42 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ spec, markdown 
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a: ({ href, children }) => <MarkdownLink href={href} currentSpec={spec}>{children}</MarkdownLink>,
+          a: ({ href, children }) => (
+            <MarkdownLink href={href} currentSpec={spec}>
+              {children}
+            </MarkdownLink>
+          ),
           code: CodeBlockForSpec,
-          h1: ({ children }) => <Heading level={1} slugger={headingSlugger}>{children}</Heading>,
-          h2: ({ children }) => <Heading level={2} slugger={headingSlugger}>{children}</Heading>,
-          h3: ({ children }) => <Heading level={3} slugger={headingSlugger}>{children}</Heading>,
-          h4: ({ children }) => <Heading level={4} slugger={headingSlugger}>{children}</Heading>,
-          h5: ({ children }) => <Heading level={5} slugger={headingSlugger}>{children}</Heading>,
-          h6: ({ children }) => <Heading level={6} slugger={headingSlugger}>{children}</Heading>,
+          h1: ({ children }) => (
+            <Heading level={1} slugger={headingSlugger}>
+              {children}
+            </Heading>
+          ),
+          h2: ({ children }) => (
+            <Heading level={2} slugger={headingSlugger}>
+              {children}
+            </Heading>
+          ),
+          h3: ({ children }) => (
+            <Heading level={3} slugger={headingSlugger}>
+              {children}
+            </Heading>
+          ),
+          h4: ({ children }) => (
+            <Heading level={4} slugger={headingSlugger}>
+              {children}
+            </Heading>
+          ),
+          h5: ({ children }) => (
+            <Heading level={5} slugger={headingSlugger}>
+              {children}
+            </Heading>
+          ),
+          h6: ({ children }) => (
+            <Heading level={6} slugger={headingSlugger}>
+              {children}
+            </Heading>
+          ),
           pre: ({ children }) => <>{children}</>,
         }}
       >
@@ -37,10 +65,13 @@ function createCodeBlockComponent(spec: Spec) {
 
   return function CodeBlockForSpec({ children, className }: { children?: ReactNode; className?: string }) {
     const language = className?.match(/language-(\w+)/)?.[1] ?? "";
-    const highlightedHtml =
-      language === "mst" ? codeHighlights[spec.path]?.[masterbeltBlockIndex++] : undefined;
+    const highlightedHtml = language === "mst" ? codeHighlights[spec.path]?.[masterbeltBlockIndex++] : undefined;
 
-    return <CodeBlock className={className} highlightedHtml={highlightedHtml}>{children}</CodeBlock>;
+    return (
+      <CodeBlock className={className} highlightedHtml={highlightedHtml}>
+        {children}
+      </CodeBlock>
+    );
   };
 }
 
@@ -67,14 +98,6 @@ function Heading({
   );
 }
 
-function MarkdownLink({
-  href,
-  currentSpec,
-  children,
-}: {
-  href?: string;
-  currentSpec: Spec;
-  children?: ReactNode;
-}) {
+function MarkdownLink({ href, currentSpec, children }: { href?: string; currentSpec: Spec; children?: ReactNode }) {
   return <a href={resolveMarkdownHref(href, currentSpec)}>{children}</a>;
 }

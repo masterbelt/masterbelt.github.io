@@ -1,5 +1,5 @@
-import { getMarkdown, getSelectedSpec } from "./data/specs";
 import { SiteFrame } from "./components/SiteFrame";
+import { getMarkdown, getSelectedSpec } from "./data/specs";
 import { HomePage } from "./pages/HomePage";
 import { SpecPage } from "./pages/SpecPage";
 
@@ -9,11 +9,7 @@ function App({ pathname }: { pathname: string }) {
 
   return (
     <SiteFrame>
-      {selectedSpec ? (
-        <SpecPage spec={selectedSpec} markdown={selectedMarkdown ?? ""} />
-      ) : (
-        <HomePage />
-      )}
+      {selectedSpec ? <SpecPage spec={selectedSpec} markdown={selectedMarkdown ?? ""} /> : <HomePage />}
     </SiteFrame>
   );
 }

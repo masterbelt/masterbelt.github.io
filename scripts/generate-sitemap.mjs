@@ -10,8 +10,7 @@ const htmlFiles = await collectHtmlFiles(distDir);
 const htmlUrls = htmlFiles.map((file) => toUrl(file));
 const specUrls = await readSpecUrls();
 const markdownUrls = await readMarkdownUrls();
-const urls = [...new Set([...htmlUrls, ...specUrls, ...markdownUrls])]
-  .sort((a, b) => a.localeCompare(b));
+const urls = [...new Set([...htmlUrls, ...specUrls, ...markdownUrls])].sort((a, b) => a.localeCompare(b));
 
 const sitemap = [
   '<?xml version="1.0" encoding="UTF-8"?>',
@@ -45,10 +44,7 @@ async function collectHtmlFiles(dir) {
 }
 
 function toUrl(fileUrl) {
-  const relativePath = path.posix.relative(
-    toPosixPath(distDir),
-    toPosixPath(fileUrl),
-  );
+  const relativePath = path.posix.relative(toPosixPath(distDir), toPosixPath(fileUrl));
   const route = relativePath.replace(/(^|\/)index\.html$/, "$1");
   return new URL(route, siteUrl).toString();
 }

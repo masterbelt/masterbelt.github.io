@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type PointerEvent, type ReactNode } from "react";
+import { type PointerEvent, type ReactNode, useEffect, useId, useState } from "react";
 import { formatLanguage, highlightCode } from "../lib/syntaxHighlight";
 
 export function CodeBlock({
@@ -25,6 +25,7 @@ export function CodeBlock({
     <figure className="code-block">
       <figcaption>{formatLanguage(language)}</figcaption>
       <pre data-language={language}>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: code highlighter returns escaped HTML with token spans */}
         <code dangerouslySetInnerHTML={{ __html: highlightedHtml ?? highlightCode(code, language) }} />
       </pre>
     </figure>
@@ -92,10 +93,16 @@ function MermaidDiagram({ code }: { code: string }) {
       <figcaption>
         <span>Mermaid</span>
         <span className="mermaid-controls">
-          <button type="button" onClick={() => setScale((value) => Math.max(0.75, value - 0.25))}>-</button>
+          <button type="button" onClick={() => setScale((value) => Math.max(0.75, value - 0.25))}>
+            -
+          </button>
           <span>{Math.round(scale * 100)}%</span>
-          <button type="button" onClick={() => setScale((value) => Math.min(2.5, value + 0.25))}>+</button>
-          <button type="button" onClick={() => setScale(1)}>Reset</button>
+          <button type="button" onClick={() => setScale((value) => Math.min(2.5, value + 0.25))}>
+            +
+          </button>
+          <button type="button" onClick={() => setScale(1)}>
+            Reset
+          </button>
         </span>
       </figcaption>
       <div
@@ -108,6 +115,7 @@ function MermaidDiagram({ code }: { code: string }) {
         <div
           className="mermaid-canvas"
           style={{ "--mermaid-scale": String(scale) } as React.CSSProperties}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Mermaid renders SVG markup from a strict-security parser
           dangerouslySetInnerHTML={{ __html: svg }}
         />
       </div>
