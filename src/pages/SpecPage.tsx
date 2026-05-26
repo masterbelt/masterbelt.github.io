@@ -26,9 +26,18 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   }, [spec.path]);
 
   useEffect(() => {
-    const initialHeadingId = headings[0]?.id ?? "";
+    const headingIds = new Set(headings.map((heading) => heading.id));
+    const initialHeadingId = getLocationHeadingId(headingIds) || headings[0]?.id || "";
     activeHeadingIdRef.current = initialHeadingId;
     setActiveHeadingId(initialHeadingId);
+
+    const syncActiveHeadingFromHash = () => {
+      const hashHeadingId = getLocationHeadingId(headingIds);
+      if (!hashHeadingId || activeHeadingIdRef.current === hashHeadingId) return;
+
+      activeHeadingIdRef.current = hashHeadingId;
+      setActiveHeadingId(hashHeadingId);
+    };
 
     const updateActiveHeading = () => {
       const headingElements = headings
@@ -50,11 +59,14 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
       }
     };
 
-    updateActiveHeading();
+    const updateTimer = window.setTimeout(updateActiveHeading, 0);
+    window.addEventListener("hashchange", syncActiveHeadingFromHash);
     window.addEventListener("scroll", updateActiveHeading, { passive: true });
     window.addEventListener("resize", updateActiveHeading);
 
     return () => {
+      window.clearTimeout(updateTimer);
+      window.removeEventListener("hashchange", syncActiveHeadingFromHash);
       window.removeEventListener("scroll", updateActiveHeading);
       window.removeEventListener("resize", updateActiveHeading);
     };
@@ -531,6 +543,11 @@ function scrollNavItemToCenter(nav: HTMLElement | null, navItem: HTMLElement | n
     top: Math.min(maxTop, Math.max(0, targetTop)),
     behavior: "auto",
   });
+}
+
+function getLocationHeadingId(headingIds: Set<string>) {
+  const hash = decodeURIComponent(window.location.hash.slice(1));
+  return headingIds.has(hash) ? hash : "";
 }
 
 function SpecNavigation({
