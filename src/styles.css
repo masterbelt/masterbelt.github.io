@@ -241,10 +241,15 @@ a {
   align-items: center;
   display: inline-flex;
   gap: 0.4rem;
+  flex: 0 0 auto;
   text-transform: none;
 }
 
 .mermaid-controls button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  width: 1.8rem;
   min-height: 1.8rem;
   border: 1px solid var(--color-zinc-300);
   border-radius: 0.3rem;
@@ -253,7 +258,18 @@ a {
   cursor: pointer;
   font: inherit;
   font-size: 0.75rem;
-  padding: 0 0.5rem;
+  padding: 0;
+}
+
+.mermaid-controls svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.mermaid-scale {
+  display: inline-block;
+  min-width: 3.25rem;
+  text-align: center;
 }
 
 .mermaid-controls button:hover {

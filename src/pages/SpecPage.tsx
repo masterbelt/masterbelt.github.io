@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { FaGithub } from "react-icons/fa6";
+import { LuFileText } from "react-icons/lu";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 import { type Spec, source, specNavRows } from "../data/specs";
 import { extractHeadings } from "../lib/markdown";
@@ -137,10 +139,12 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
             <h1 className="m-0 text-5xl font-black leading-tight">{spec.title}</h1>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-600">
               <span>Synced from main@{source.shortCommit || "local"}</span>
-              <a className="text-teal-900" href={spec.markdownUrl}>
+              <a className="inline-flex items-center gap-1.5 text-teal-900" href={spec.markdownUrl}>
+                <LuFileText aria-hidden="true" size={15} />
                 Markdown
               </a>
-              <a className="text-teal-900" href={spec.sourceUrl}>
+              <a className="inline-flex items-center gap-1.5 text-teal-900" href={spec.sourceUrl}>
+                <FaGithub aria-hidden="true" size={15} />
                 Source
               </a>
             </div>

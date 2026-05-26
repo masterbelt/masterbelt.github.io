@@ -1,4 +1,5 @@
 import { type PointerEvent, type ReactNode, useEffect, useId, useState } from "react";
+import { LuRotateCcw, LuZoomIn, LuZoomOut } from "react-icons/lu";
 import { formatLanguage, highlightCode } from "../lib/syntaxHighlight";
 
 export function CodeBlock({
@@ -93,15 +94,25 @@ function MermaidDiagram({ code }: { code: string }) {
       <figcaption>
         <span>Mermaid</span>
         <span className="mermaid-controls">
-          <button type="button" onClick={() => setScale((value) => Math.max(0.75, value - 0.25))}>
-            -
+          <button
+            type="button"
+            onClick={() => setScale((value) => Math.max(0.75, value - 0.25))}
+            aria-label="Zoom out"
+            title="Zoom out"
+          >
+            <LuZoomOut aria-hidden="true" size={14} />
           </button>
-          <span>{Math.round(scale * 100)}%</span>
-          <button type="button" onClick={() => setScale((value) => Math.min(2.5, value + 0.25))}>
-            +
+          <span className="mermaid-scale">{Math.round(scale * 100)}%</span>
+          <button
+            type="button"
+            onClick={() => setScale((value) => Math.min(2.5, value + 0.25))}
+            aria-label="Zoom in"
+            title="Zoom in"
+          >
+            <LuZoomIn aria-hidden="true" size={14} />
           </button>
-          <button type="button" onClick={() => setScale(1)}>
-            Reset
+          <button type="button" onClick={() => setScale(1)} aria-label="Reset zoom" title="Reset zoom">
+            <LuRotateCcw aria-hidden="true" size={14} />
           </button>
         </span>
       </figcaption>
