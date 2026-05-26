@@ -297,7 +297,7 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
     if (event.key === "Enter" && isOpen && activeResult) {
       event.preventDefault();
       closeSearch();
-      window.location.href = activeResult.spec.route;
+      window.location.href = getSearchResultHref(activeResult);
     }
   };
 
@@ -365,11 +365,14 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
                           ? "bg-teal-50 font-bold text-teal-950"
                           : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                     }`}
-                    href={result.spec.route}
+                    href={getSearchResultHref(result)}
                     onClick={closeSearch}
                     onMouseEnter={() => setActiveIndex(index)}
                   >
                     <span className="block font-bold">{result.spec.title}</span>
+                    {result.section ? (
+                      <span className="mt-1 block text-xs font-bold opacity-80">In {result.section.text}</span>
+                    ) : null}
                     {result.excerpt ? <span className="mt-1 block text-xs opacity-75">{result.excerpt}</span> : null}
                   </a>
                 );
@@ -386,6 +389,10 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
 
 function getSearchOptionId(path: string) {
   return `spec-search-result-${path.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function getSearchResultHref(result: SpecSearchResult) {
+  return result.section ? `${result.spec.route}#${result.section.id}` : result.spec.route;
 }
 
 function scrollElementIntoContainer(element: HTMLElement, container: HTMLElement) {
