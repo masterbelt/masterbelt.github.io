@@ -26,3 +26,366 @@ body {
 a {
   text-underline-offset: 0.18em;
 }
+
+.prose {
+  color: var(--color-zinc-800);
+  font-size: 1.03rem;
+  line-height: 1.82;
+}
+
+.prose > * {
+  max-width: 880px;
+}
+
+.prose > pre,
+.prose > table,
+.prose > figure {
+  max-width: 100%;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: var(--color-zinc-900);
+  line-height: 1.2;
+  position: relative;
+  scroll-margin-top: 1.5rem;
+}
+
+.prose h1 {
+  margin: 0 0 1.4rem;
+  font-size: 2.65rem;
+  line-height: 1.05;
+}
+
+.prose h2 {
+  border-top: 1px solid var(--color-zinc-200);
+  margin: 3rem 0 1rem;
+  padding-top: 1.6rem;
+  font-size: 1.85rem;
+}
+
+.prose h3 {
+  margin: 2.25rem 0 0.75rem;
+  font-size: 1.35rem;
+}
+
+.prose h4 {
+  margin: 1.8rem 0 0.6rem;
+  font-size: 1.12rem;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote,
+.prose table,
+.prose pre {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose ul ul {
+  list-style: circle;
+}
+
+.prose ul ul ul {
+  list-style: square;
+}
+
+.prose li::marker {
+  color: var(--color-zinc-500);
+}
+
+.prose li + li {
+  margin-top: 0.35rem;
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.prose > pre {
+  overflow: auto;
+  border-radius: 0.5rem;
+  background: var(--color-zinc-50);
+  color: var(--color-zinc-950);
+  padding: 1.1rem 1.2rem;
+  line-height: 1.65;
+}
+
+.prose code {
+  font-size: 0.9em;
+}
+
+.prose :not(pre) > code {
+  border-radius: 0.25rem;
+  background: var(--color-zinc-100);
+  padding: 0.12rem 0.28rem;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--color-zinc-200);
+  padding: 0.65rem 0.8rem;
+  vertical-align: top;
+}
+
+.prose blockquote {
+  border-left: 4px solid var(--color-teal-700);
+  color: var(--color-zinc-600);
+  padding-left: 1rem;
+}
+
+.heading-anchor {
+  left: -0.9em;
+  position: absolute;
+  color: var(--color-zinc-400);
+  font-weight: 700;
+  opacity: 0;
+  text-decoration: none;
+}
+
+.prose h1:hover .heading-anchor,
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor,
+.prose h4:hover .heading-anchor,
+.prose h5:hover .heading-anchor,
+.prose h6:hover .heading-anchor {
+  opacity: 1;
+}
+
+.code-block,
+.mermaid-block {
+  overflow: hidden;
+  border: 1px solid var(--color-zinc-300);
+  border-radius: 0.6rem;
+  background: var(--color-white);
+}
+
+.code-block figcaption,
+.mermaid-block figcaption {
+  align-items: center;
+  border-bottom: 1px solid var(--color-zinc-200);
+  background: var(--color-zinc-50);
+  color: var(--color-zinc-600);
+  display: flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 1rem;
+  justify-content: space-between;
+  letter-spacing: 0.02em;
+  padding: 0.45rem 0.8rem;
+  text-transform: uppercase;
+}
+
+.code-block pre {
+  margin: 0;
+  border-radius: 0;
+  padding: 1.25rem 1.35rem;
+  background: var(--color-zinc-50);
+  color: var(--color-zinc-950);
+}
+
+.code-block code {
+  display: block;
+  min-width: max-content;
+  line-height: 1.7;
+}
+
+.mermaid-scroll {
+  cursor: grab;
+  overflow: auto;
+  padding: 1.25rem;
+  touch-action: none;
+  user-select: none;
+}
+
+.mermaid-scroll.is-dragging {
+  cursor: grabbing;
+}
+
+.mermaid-canvas {
+  display: inline-block;
+  min-width: calc(1200px * var(--mermaid-scale, 1.5));
+  transform: scale(var(--mermaid-scale, 1.5));
+  transform-origin: top left;
+}
+
+.mermaid-block svg {
+  display: block;
+  max-width: none;
+  min-width: 1200px;
+}
+
+.mermaid-controls {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+  text-transform: none;
+}
+
+.mermaid-controls button {
+  min-height: 1.8rem;
+  border: 1px solid var(--color-zinc-300);
+  border-radius: 0.3rem;
+  background: var(--color-white);
+  color: var(--color-zinc-800);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+.mermaid-controls button:hover {
+  border-color: var(--color-teal-700);
+  color: var(--color-teal-700);
+}
+
+.token-name {
+  color: var(--color-sky-700);
+  font-weight: 700;
+}
+
+.token-keyword {
+  color: var(--color-rose-700);
+  font-weight: 700;
+}
+
+.token-string {
+  color: var(--color-lime-700);
+  font-weight: 600;
+}
+
+.token-property {
+  color: var(--color-orange-700);
+  font-weight: 700;
+}
+
+.token-type,
+.token-constant {
+  color: var(--color-amber-700);
+  font-weight: 700;
+}
+
+.token-number {
+  color: var(--color-indigo-700);
+  font-weight: 700;
+}
+
+.token-function {
+  color: var(--color-blue-700);
+  font-weight: 700;
+}
+
+.token-comment {
+  color: var(--color-zinc-500);
+  font-style: italic;
+}
+
+.token-punctuation {
+  color: var(--color-violet-700);
+  font-weight: 700;
+}
+
+.code-block .keyword {
+  color: var(--color-rose-700);
+  font-weight: 700;
+}
+
+.code-block .keyword.modifier {
+  color: var(--color-purple-700);
+}
+
+.code-block .operator,
+.code-block .punctuation {
+  color: var(--color-zinc-700);
+  font-weight: 700;
+}
+
+.code-block .function,
+.code-block .function.method {
+  color: var(--color-blue-700);
+  font-weight: 700;
+}
+
+.code-block .type,
+.code-block .type.definition,
+.code-block .type.parameter,
+.code-block .type.builtin {
+  color: var(--color-teal-700);
+  font-weight: 700;
+}
+
+.code-block .property {
+  color: var(--color-orange-700);
+  font-weight: 600;
+}
+
+.code-block .constant,
+.code-block .constant.builtin {
+  color: var(--color-amber-700);
+  font-weight: 700;
+}
+
+.code-block .number,
+.code-block .boolean {
+  color: var(--color-indigo-700);
+  font-weight: 700;
+}
+
+.code-block .string {
+  color: var(--color-lime-700);
+}
+
+.code-block .comment,
+.code-block .comment.documentation {
+  color: var(--color-zinc-500);
+  font-style: italic;
+}
+
+.code-block .variable.parameter {
+  color: var(--color-sky-700);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+@media (max-width: 760px) {
+  .prose {
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .prose h1 {
+    font-size: 2.1rem;
+  }
+
+  .prose h2 {
+    font-size: 1.55rem;
+  }
+}

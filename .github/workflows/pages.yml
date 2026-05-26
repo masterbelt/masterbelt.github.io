@@ -22,6 +22,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Checkout Masterbelt source
+        uses: actions/checkout@v6
+        with:
+          repository: masterbelt/masterbelt
+          ref: main
+          path: masterbelt-source
+          token: ${{ secrets.MASTERBELT_READ_TOKEN }}
+          persist-credentials: false
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
 
@@ -33,6 +42,15 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install Masterbelt syntax dependencies
+        run: pnpm --dir masterbelt-source/internal/masterbelt/syntax install
+
+      - name: Generate specs
+        run: pnpm generate:spec masterbelt-source
+
+      - name: Test
+        run: pnpm test
 
       - name: Build
         run: pnpm build

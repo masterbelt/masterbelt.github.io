@@ -4,10 +4,13 @@ import { fileURLToPath } from "node:url";
 
 const siteUrl = "https://masterbelt.dev";
 const distDir = new URL("../dist/", import.meta.url);
+const manifestPath = new URL("../src/generated/spec-manifest.json", import.meta.url);
 
 const htmlFiles = await collectHtmlFiles(distDir);
-const urls = htmlFiles
-  .map((file) => toUrl(file))
+const htmlUrls = htmlFiles.map((file) => toUrl(file));
+const specUrls = await readSpecUrls();
+const markdownUrls = await readMarkdownUrls();
+const urls = [...new Set([...htmlUrls, ...specUrls, ...markdownUrls])]
   .sort((a, b) => a.localeCompare(b));
 
 const sitemap = [
@@ -61,4 +64,22 @@ function escapeXml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
+}
+
+async function readSpecUrls() {
+  try {
+    const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+    return manifest.specs.map((spec) => new URL(spec.route, siteUrl).toString());
+  } catch {
+    return [];
+  }
+}
+
+async function readMarkdownUrls() {
+  try {
+    const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+    return manifest.specs.map((spec) => new URL(spec.markdownUrl, siteUrl).toString());
+  } catch {
+    return [];
+  }
 }
