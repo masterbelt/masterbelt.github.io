@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
+import { compareSpecRelativePaths } from "./spec-order.mjs";
 
 const execFileAsync = promisify(execFile);
 const repoArg = process.argv[2] ?? "../masterbelt";
@@ -181,13 +182,5 @@ function compareSpecPaths(left, right) {
   const leftRelative = toPosix(path.relative(specDir, left));
   const rightRelative = toPosix(path.relative(specDir, right));
 
-  if (leftRelative === "README.md") {
-    return -1;
-  }
-
-  if (rightRelative === "README.md") {
-    return 1;
-  }
-
-  return leftRelative.localeCompare(rightRelative);
+  return compareSpecRelativePaths(leftRelative, rightRelative);
 }
