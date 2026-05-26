@@ -8,6 +8,7 @@ import { extractHeadings } from "../lib/markdown";
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   const headings = useMemo(() => extractHeadings(markdown).filter((heading) => heading.level > 1), [markdown]);
   const hasHeadings = headings.length > 0;
+  const sectionNavigation = useMemo(() => getSectionNavigation(spec), [spec]);
   const siblingNavigation = useMemo(() => getSiblingNavigation(spec), [spec]);
   const desktopSpecNavRef = useRef<HTMLElement | null>(null);
   const desktopCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
@@ -133,6 +134,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
           </div>
 
           <MarkdownRenderer spec={spec} markdown={markdown} />
+          <SectionBackLink sectionNavigation={sectionNavigation} />
           <SpecPager next={siblingNavigation.next} previous={siblingNavigation.previous} />
         </article>
 
@@ -148,6 +150,33 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
         </section>
       </div>
     </section>
+  );
+}
+
+function getSectionNavigation(currentSpec: Spec) {
+  const section = currentSpec.segments[0];
+  if (!section || currentSpec.segments.length < 2) return undefined;
+
+  const firstSpec = specs.find((item) => item.segments[0] === section);
+  if (!firstSpec) return undefined;
+
+  return {
+    label: formatSegmentLabel(section),
+    route: firstSpec.route,
+  };
+}
+
+function SectionBackLink({ sectionNavigation }: { sectionNavigation?: { label: string; route: string } }) {
+  if (!sectionNavigation) return null;
+
+  return (
+    <a
+      className="mt-6 inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm font-bold text-teal-900 no-underline hover:border-teal-700 hover:text-teal-950"
+      href={sectionNavigation.route}
+    >
+      <FaArrowLeft aria-hidden="true" size={14} />
+      Back to {sectionNavigation.label}
+    </a>
   );
 }
 
