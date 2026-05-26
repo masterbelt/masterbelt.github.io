@@ -1,8 +1,8 @@
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { FaArrowLeft, FaArrowRight, FaGithub } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaGithub, FaMagnifyingGlass } from "react-icons/fa6";
 import { LuFileText } from "react-icons/lu";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
-import { type Spec, source, specNavRows, specs } from "../data/specs";
+import { type Spec, searchSpecs, source, specNavRows, specs } from "../data/specs";
 import { extractHeadings } from "../lib/markdown";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
@@ -76,7 +76,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   return (
     <section className="border-t border-zinc-200">
       <div className="mx-auto grid w-[min(1280px,calc(100%-32px))] grid-cols-1 gap-10 py-10 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className={`${hasHeadings ? "grid" : "hidden lg:grid"} gap-4 lg:sticky lg:top-4 lg:self-start`}>
+        <aside className="grid gap-4 lg:sticky lg:top-4 lg:self-start">
           {hasHeadings ? (
             <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
               <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">On this page</div>
@@ -103,6 +103,8 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
               </nav>
             </section>
           ) : null}
+
+          <SpecSearch currentSpecPath={spec.path} />
 
           <section className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white lg:block">
             <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
@@ -149,6 +151,55 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
           />
         </section>
       </div>
+    </section>
+  );
+}
+
+function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
+  const [query, setQuery] = useState("");
+  const results = useMemo(() => searchSpecs(query), [query]);
+  const hasQuery = query.trim().length >= 2;
+
+  return (
+    <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+      <label className="block px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600" htmlFor="spec-search">
+        Search
+      </label>
+      <div className="px-3 pb-3">
+        <div className="flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 focus-within:border-teal-700">
+          <FaMagnifyingGlass className="shrink-0 text-zinc-400" aria-hidden="true" size={13} />
+          <input
+            id="spec-search"
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-zinc-400"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.currentTarget.value)}
+            placeholder="Find specs"
+          />
+        </div>
+      </div>
+      {hasQuery ? (
+        <div className="grid max-h-80 gap-1 overflow-auto px-2 pb-3 text-sm">
+          {results.length > 0 ? (
+            results.map((result) => (
+              <a
+                key={result.spec.path}
+                className={`rounded-md px-3 py-2 no-underline ${
+                  result.spec.path === currentSpecPath
+                    ? "bg-teal-900 text-white"
+                    : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+                }`}
+                href={result.spec.route}
+              >
+                <span className="block font-bold">{result.spec.title}</span>
+                {result.excerpt ? <span className="mt-1 block text-xs opacity-75">{result.excerpt}</span> : null}
+              </a>
+            ))
+          ) : (
+            <p className="m-0 px-3 py-2 text-sm text-zinc-500">No matching specs.</p>
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }
