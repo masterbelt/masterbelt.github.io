@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Masterbelt monochrome icon</title>
+  <desc id="desc">A one-color M monogram crossed by a single belt line and buckle for Masterbelt.</desc>
+  <path fill="currentColor" d="M9 52V12h10l13 17 13-17h10v40H44V28L34 42h-4L20 28v24H9Z"/>
+  <path fill="currentColor" d="M8 29h48v6H8z"/>
+  <rect width="9" height="12" x="27.5" y="26" fill="currentColor" rx="2"/>
+</svg>

@@ -33,6 +33,26 @@ export function withPageMetadata(html, metadata) {
       `<meta name="description" content="${escapeAttribute(metadata.description)}" />`,
     )
     .replace(
+      /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:title" content="${escapeAttribute(metadata.title)}" />`,
+    )
+    .replace(
+      /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:description" content="${escapeAttribute(metadata.description)}" />`,
+    )
+    .replace(
+      /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:url" content="${escapeAttribute(metadata.canonical)}" />`,
+    )
+    .replace(
+      /<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/,
+      `<meta name="twitter:title" content="${escapeAttribute(metadata.title)}" />`,
+    )
+    .replace(
+      /<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/,
+      `<meta name="twitter:description" content="${escapeAttribute(metadata.description)}" />`,
+    )
+    .replace(
       /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/,
       alternateLinks ? `${canonicalLink}\n    ${alternateLinks}` : canonicalLink,
     );

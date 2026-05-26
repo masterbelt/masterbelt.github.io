@@ -5,8 +5,7 @@ export function SiteFrame({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-stone-50 text-zinc-950">
       <header className="mx-auto flex min-h-18 w-[min(1120px,calc(100%-32px))] items-center justify-between gap-6">
         <a className="flex items-center gap-3 font-bold no-underline" href="/" aria-label="Masterbelt home">
-          <img src="/masterbelt-mark.svg" width="32" height="32" alt="" />
-          <span>Masterbelt</span>
+          <img className="h-8 w-auto" src="/assets/img/masterbelt-logo.svg" width="156" height="32" alt="Masterbelt" />
         </a>
         <nav className="flex items-center gap-5 text-sm text-zinc-600" aria-label="Primary">
           <a className="hover:text-zinc-950" href="/spec/">

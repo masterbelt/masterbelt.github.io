@@ -11,6 +11,11 @@ const shellHtml = `<!doctype html>
 <html>
   <head>
     <meta name="description" content="Default description" />
+    <meta property="og:title" content="Masterbelt" />
+    <meta property="og:description" content="Default description" />
+    <meta property="og:url" content="https://masterbelt.dev/" />
+    <meta name="twitter:title" content="Masterbelt" />
+    <meta name="twitter:description" content="Default description" />
     <link rel="canonical" href="https://masterbelt.dev/" />
     <title>Masterbelt</title>
   </head>
@@ -42,6 +47,11 @@ test("withPageMetadata writes page-specific title, description, and canonical", 
 
   assert.match(html, /<title>Syntax Structure \| Masterbelt<\/title>/);
   assert.match(html, /<meta name="description" content="Syntax &quot;reference&quot; &amp; examples" \/>/);
+  assert.match(html, /<meta property="og:title" content="Syntax Structure \| Masterbelt" \/>/);
+  assert.match(html, /<meta property="og:description" content="Syntax &quot;reference&quot; &amp; examples" \/>/);
+  assert.match(html, /<meta property="og:url" content="https:\/\/masterbelt.dev\/spec\/language\/syntax\/" \/>/);
+  assert.match(html, /<meta name="twitter:title" content="Syntax Structure \| Masterbelt" \/>/);
+  assert.match(html, /<meta name="twitter:description" content="Syntax &quot;reference&quot; &amp; examples" \/>/);
   assert.match(html, /<link rel="canonical" href="https:\/\/masterbelt.dev\/spec\/language\/syntax\/" \/>/);
   assert.match(
     html,

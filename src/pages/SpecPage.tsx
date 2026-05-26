@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { FaGithub } from "react-icons/fa6";
 import { LuFileText } from "react-icons/lu";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
@@ -7,14 +7,17 @@ import { extractHeadings } from "../lib/markdown";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   const headings = useMemo(() => extractHeadings(markdown), [markdown]);
-  const currentNavItemRef = useRef<HTMLAnchorElement | null>(null);
+  const desktopCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
+  const mobileCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
   const headingsNavRef = useRef<HTMLElement | null>(null);
   const activeHeadingIdRef = useRef(headings[0]?.id ?? "");
   const [activeHeadingId, setActiveHeadingId] = useState(headings[0]?.id ?? "");
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: this effect intentionally runs when the selected spec changes
   useEffect(() => {
-    currentNavItemRef.current?.scrollIntoView({
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
+
+    desktopCurrentNavItemRef.current?.scrollIntoView({
       block: "center",
       inline: "nearest",
     });
@@ -98,38 +101,14 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
             </nav>
           </section>
 
-          <section>
+          <section className="hidden lg:block">
             <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
-            <nav
-              className="grid max-h-[calc(70vh-156px)] gap-1 overflow-auto px-2 pb-3 text-sm"
-              aria-label="Spec pages"
-            >
-              {specNavRows.map((row) =>
-                row.type === "section" ? (
-                  <div
-                    key={row.key}
-                    className="mt-3 text-xs font-black uppercase tracking-wide text-zinc-500 first:mt-0"
-                    style={{ paddingLeft: `${12 + row.depth * 12}px` }}
-                  >
-                    {row.label}
-                  </div>
-                ) : (
-                  <a
-                    key={row.key}
-                    ref={row.spec.path === spec.path ? currentNavItemRef : undefined}
-                    className={`rounded-md py-2 pr-3 no-underline ${
-                      row.spec.path === spec.path
-                        ? "bg-teal-900 font-bold text-white"
-                        : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
-                    }`}
-                    href={row.spec.route}
-                    style={{ paddingLeft: `${12 + row.depth * 12}px` }}
-                  >
-                    {row.spec.title}
-                  </a>
-                ),
-              )}
-            </nav>
+            <SpecNavigation
+              ariaLabel="Spec pages"
+              currentNavItemRef={desktopCurrentNavItemRef}
+              currentSpecPath={spec.path}
+              maxHeightClassName="max-h-[calc(70vh-156px)]"
+            />
           </section>
         </aside>
 
@@ -152,7 +131,59 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
           <MarkdownRenderer spec={spec} markdown={markdown} />
         </article>
+
+        <section className="overflow-hidden border-l border-zinc-300 bg-white lg:hidden">
+          <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
+          <SpecNavigation
+            ariaLabel="Other spec pages"
+            currentNavItemRef={mobileCurrentNavItemRef}
+            currentSpecPath={spec.path}
+            maxHeightClassName="max-h-[52vh]"
+          />
+        </section>
       </div>
     </section>
+  );
+}
+
+function SpecNavigation({
+  ariaLabel,
+  currentNavItemRef,
+  currentSpecPath,
+  maxHeightClassName,
+}: {
+  ariaLabel: string;
+  currentNavItemRef: RefObject<HTMLAnchorElement | null>;
+  currentSpecPath: string;
+  maxHeightClassName: string;
+}) {
+  return (
+    <nav className={`grid gap-1 overflow-auto px-2 pb-3 text-sm ${maxHeightClassName}`} aria-label={ariaLabel}>
+      {specNavRows.map((row) =>
+        row.type === "section" ? (
+          <div
+            key={row.key}
+            className="mt-3 text-xs font-black uppercase tracking-wide text-zinc-500 first:mt-0"
+            style={{ paddingLeft: `${12 + row.depth * 12}px` }}
+          >
+            {row.label}
+          </div>
+        ) : (
+          <a
+            key={row.key}
+            ref={row.spec.path === currentSpecPath ? currentNavItemRef : undefined}
+            className={`rounded-md py-2 pr-3 no-underline ${
+              row.spec.path === currentSpecPath
+                ? "bg-teal-900 font-bold text-white"
+                : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+            }`}
+            href={row.spec.route}
+            style={{ paddingLeft: `${12 + row.depth * 12}px` }}
+          >
+            {row.spec.title}
+          </a>
+        ),
+      )}
+    </nav>
   );
 }
