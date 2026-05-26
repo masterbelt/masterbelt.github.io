@@ -469,7 +469,13 @@ function SectionBackLink({ sectionNavigation }: { sectionNavigation?: { label: s
 }
 
 function SpecBreadcrumb({ spec }: { spec: Spec }) {
-  const sectionLabel = spec.segments.length > 1 ? formatSegmentLabel(spec.segments[0]) : undefined;
+  const isSpecIndex = spec.route === "/spec/";
+  const sectionLabel =
+    !isSpecIndex && hasManifestSection(spec)
+      ? spec.sectionTitle
+      : spec.segments.length > 1
+        ? formatSegmentLabel(spec.segments[0])
+        : undefined;
 
   return (
     <nav className="mb-3 flex flex-wrap items-center gap-1.5 text-xs font-bold text-zinc-500" aria-label="Breadcrumb">
