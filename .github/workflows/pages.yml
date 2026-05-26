@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: masterbelt/masterbelt
-          ref: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.source_sha || 'main' }}
+          ref: ${{ github.event_name == 'repository_dispatch' && (github.event.client_payload.source_ref || github.event.client_payload.source_sha) || 'main' }}
           path: masterbelt-source
           token: ${{ steps.masterbelt-source-token.outputs.token }}
           persist-credentials: false
@@ -63,6 +63,8 @@ jobs:
 
       - name: Generate specs
         run: pnpm generate:spec masterbelt-source
+        env:
+          MASTERBELT_SOURCE_REF: ${{ github.event_name == 'repository_dispatch' && (github.event.client_payload.source_ref || github.event.client_payload.source_sha) || 'main' }}
 
       - name: Check formatting and lint
         run: pnpm biome:check

@@ -164,10 +164,10 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
                     className="font-bold text-teal-900"
                     href={`https://github.com/masterbelt/masterbelt/commit/${source.commit}`}
                   >
-                    main@{source.shortCommit || source.commit.slice(0, 7)}
+                    {formatSourceRef(source as SourceInfo)}
                   </a>
                 ) : (
-                  "main@local"
+                  `${getSourceRef(source as SourceInfo)}@local`
                 )}
               </span>
               <a className="inline-flex items-center gap-1.5 text-teal-900" href={spec.markdownUrl}>
@@ -440,6 +440,25 @@ function isEditableTarget(target: EventTarget | null) {
 
   const tagName = target.tagName.toLowerCase();
   return target.isContentEditable || tagName === "input" || tagName === "textarea" || tagName === "select";
+}
+
+type SourceInfo = typeof source & {
+  ref?: string;
+};
+
+function formatSourceRef(sourceInfo: SourceInfo) {
+  const shortCommit = sourceInfo.shortCommit || sourceInfo.commit.slice(0, 7);
+  const sourceRef = getSourceRef(sourceInfo);
+
+  if (sourceRef === sourceInfo.commit || /^[0-9a-f]{40}$/i.test(sourceRef)) {
+    return shortCommit;
+  }
+
+  return `${sourceRef}@${shortCommit}`;
+}
+
+function getSourceRef(sourceInfo: SourceInfo) {
+  return sourceInfo.ref || sourceInfo.branch || "detached";
 }
 
 function getSectionNavigation(currentSpec: Spec) {

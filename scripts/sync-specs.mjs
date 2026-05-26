@@ -27,6 +27,7 @@ const markdownPaths = files.map((filePath) => toPosix(path.relative(specDir, fil
 validateSourceManifest(sourceManifest, markdownPaths);
 const commit = await gitOutput(repoDir, ["rev-parse", "HEAD"]);
 const shortCommit = await gitOutput(repoDir, ["rev-parse", "--short", "HEAD"]);
+const sourceRef = await getSourceRef(repoDir);
 const syncedAt = new Date().toISOString();
 
 const specs = [];
@@ -65,7 +66,8 @@ for (const sourcePath of files) {
 const manifest = {
   source: {
     repository: "masterbelt/masterbelt",
-    branch: "main",
+    branch: sourceRef,
+    ref: sourceRef,
     commit,
     shortCommit,
     syncedAt,
@@ -218,6 +220,23 @@ function buildGeneratedSections(sourceManifest, generatedSpecs) {
 async function gitOutput(cwd, args) {
   const { stdout } = await execFileAsync("git", args, { cwd });
   return stdout.trim();
+}
+
+async function gitOutputOrUndefined(cwd, args) {
+  try {
+    return await gitOutput(cwd, args);
+  } catch {
+    return undefined;
+  }
+}
+
+async function getSourceRef(repoDir) {
+  return (
+    process.env.MASTERBELT_SOURCE_REF?.trim() ||
+    (await gitOutputOrUndefined(repoDir, ["branch", "--show-current"])) ||
+    (await gitOutputOrUndefined(repoDir, ["name-rev", "--name-only", "--no-undefined", "HEAD"])) ||
+    "detached"
+  );
 }
 
 function extractTitle(content) {
