@@ -5,6 +5,9 @@ on:
     branches:
       - main
   workflow_dispatch:
+  repository_dispatch:
+    types:
+      - masterbelt-main-updated
 
 permissions:
   contents: read
@@ -26,7 +29,7 @@ jobs:
         id: masterbelt-source-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.MASTERBELT_APP_ID }}
+          client-id: ${{ secrets.MASTERBELT_APP_CLIENT_ID }}
           private-key: ${{ secrets.MASTERBELT_APP_PRIVATE_KEY }}
           owner: masterbelt
           repositories: masterbelt
