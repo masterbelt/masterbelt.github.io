@@ -157,7 +157,19 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
               {spec.title}
             </h1>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-600">
-              <span>Synced from main@{source.shortCommit || "local"}</span>
+              <span>
+                Synced from{" "}
+                {source.commit ? (
+                  <a
+                    className="font-bold text-teal-900"
+                    href={`https://github.com/masterbelt/masterbelt/commit/${source.commit}`}
+                  >
+                    main@{source.shortCommit || source.commit.slice(0, 7)}
+                  </a>
+                ) : (
+                  "main@local"
+                )}
+              </span>
               <a className="inline-flex items-center gap-1.5 text-teal-900" href={spec.markdownUrl}>
                 <LuFileText aria-hidden="true" size={15} />
                 Markdown
