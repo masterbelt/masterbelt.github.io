@@ -1,0 +1,4 @@
+Contact: mailto:masterbelt@googlegroups.com
+Expires: 2027-05-27T00:00:00Z
+Canonical: https://masterbelt.dev/.well-known/security.txt
+Preferred-Languages: ja, en
