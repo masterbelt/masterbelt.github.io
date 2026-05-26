@@ -2,8 +2,9 @@ import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaGithub, FaMagnifyingGlass } from "react-icons/fa6";
 import { LuFileText } from "react-icons/lu";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
-import { type Spec, searchSpecs, source, specNavRows, specs } from "../data/specs";
+import { type Spec, source, specNavRows, specs } from "../data/specs";
 import { extractHeadings } from "../lib/markdown";
+import { type SpecSearchResult, searchSpecs } from "../lib/specSearch";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   const headings = useMemo(() => extractHeadings(markdown).filter((heading) => heading.level > 1), [markdown]);
@@ -188,9 +189,23 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
 function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
   const [query, setQuery] = useState("");
-  const results = useMemo(() => searchSpecs(query), [query]);
+  const [results, setResults] = useState<SpecSearchResult[]>([]);
   const hasQuery = query.trim().length >= 2;
   const resultsId = "spec-search-results";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    searchSpecs(query).then((nextResults) => {
+      if (!cancelled) {
+        setResults(nextResults);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query]);
 
   return (
     <section

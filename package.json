@@ -5,8 +5,8 @@
   "packageManager": "pnpm@10.11.0",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist/server --emptyOutDir false && node scripts/generate-static-routes.mjs && node scripts/generate-llms-txt.mjs && node scripts/generate-sitemap.mjs",
-    "generate:spec": "node scripts/sync-specs.mjs",
+    "build": "node scripts/generate-search-index.mjs && tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist/server --emptyOutDir false && node scripts/generate-static-routes.mjs && node scripts/generate-llms-txt.mjs && node scripts/generate-sitemap.mjs",
+    "generate:spec": "node scripts/sync-specs.mjs && node scripts/generate-search-index.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "preview": "vite preview",
     "check": "tsc -b",

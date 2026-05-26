@@ -6,8 +6,10 @@
       "!dist",
       "!masterbelt-source",
       "!node_modules",
+      "!public/spec-search-index.json",
       "!src/generated/spec",
       "!src/generated/code-highlights.json",
+      "!src/generated/spec-search-index.json",
       "!src/generated/spec-manifest.json"
     ]
   },

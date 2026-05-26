@@ -1,4 +1,3 @@
-import MiniSearch from "minisearch";
 import manifest from "../generated/spec-manifest.json";
 
 const markdownModules = import.meta.glob("../generated/spec/**/*.md", {
@@ -22,33 +21,6 @@ export const specs = manifest.specs;
 export const source = manifest.source;
 export const codeHighlights = codeHighlightModules["../generated/code-highlights.json"] ?? {};
 export const specNavRows = buildSpecNavRows(specs);
-const specSearchIndex = buildSpecSearchIndex();
-
-export function searchSpecs(query: string, limit = 8) {
-  if (query.trim().length < 2) {
-    return [];
-  }
-
-  return specSearchIndex
-    .search(query, {
-      boost: {
-        title: 4,
-        path: 2,
-      },
-      prefix: true,
-    })
-    .slice(0, limit)
-    .map((result) => {
-      const spec = specs.find((item) => item.path === result.id);
-      if (!spec) return undefined;
-
-      return {
-        spec,
-        excerpt: excerptSpecSearchResult(getMarkdown(spec) ?? "", result.terms),
-      };
-    })
-    .filter((result): result is NonNullable<typeof result> => Boolean(result));
-}
 
 export function getSelectedSpec(pathname: string) {
   if (pathname === "/spec" || pathname === "/spec/") {
@@ -94,44 +66,6 @@ function buildSpecNavRows(items: Spec[]): SpecNavRow[] {
   }
 
   return rows;
-}
-
-function buildSpecSearchIndex() {
-  const index = new MiniSearch({
-    fields: ["title", "path", "markdown"],
-    idField: "path",
-    storeFields: ["path"],
-    searchOptions: {
-      combineWith: "AND",
-    },
-  });
-
-  index.addAll(
-    specs.map((spec) => ({
-      path: spec.path,
-      title: spec.title,
-      markdown: getMarkdown(spec) ?? "",
-    })),
-  );
-
-  return index;
-}
-
-function excerptSpecSearchResult(markdown: string, terms: string[]) {
-  const line =
-    markdown
-      .split("\n")
-      .map((value) => value.trim())
-      .find((value) => {
-        const normalized = normalizeSearch(value);
-        return value && !value.startsWith("#") && terms.some((term) => normalized.includes(term));
-      }) ?? "";
-
-  return line.length > 140 ? `${line.slice(0, 137)}...` : line;
-}
-
-function normalizeSearch(value: string) {
-  return value.toLocaleLowerCase();
 }
 
 function formatSegment(segment: string) {
