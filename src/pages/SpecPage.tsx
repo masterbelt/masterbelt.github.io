@@ -117,6 +117,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
         <article className="min-w-0">
           <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-5">
+            <SpecBreadcrumb spec={spec} />
             <h1 className="m-0 text-5xl font-black leading-tight">{spec.title}</h1>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-600">
               <span>Synced from main@{source.shortCommit || "local"}</span>
@@ -148,6 +149,32 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
       </div>
     </section>
   );
+}
+
+function SpecBreadcrumb({ spec }: { spec: Spec }) {
+  const sectionLabel = spec.segments.length > 1 ? formatSegmentLabel(spec.segments[0]) : undefined;
+
+  return (
+    <nav className="mb-3 flex flex-wrap items-center gap-1.5 text-xs font-bold text-zinc-500" aria-label="Breadcrumb">
+      <a className="text-teal-800 no-underline hover:text-teal-950" href="/spec/">
+        Specification
+      </a>
+      {sectionLabel ? (
+        <>
+          <span aria-hidden="true">/</span>
+          <span>{sectionLabel}</span>
+        </>
+      ) : null}
+    </nav>
+  );
+}
+
+function formatSegmentLabel(segment: string) {
+  return segment
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((word) => `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`)
+    .join(" ");
 }
 
 function getSiblingNavigation(currentSpec: Spec) {
