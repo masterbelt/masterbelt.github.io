@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaGithub, FaMagnifyingGlass } from "react-icons/fa6";
 import { LuFileText } from "react-icons/lu";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
@@ -188,10 +188,15 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 }
 
 function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
+  const searchRef = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SpecSearchResult[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const hasQuery = query.trim().length >= 2;
+  const isOpen = hasQuery && isSearchOpen;
   const resultsId = "spec-search-results";
+  const activeResult = activeIndex >= 0 ? results[activeIndex] : undefined;
 
   useEffect(() => {
     let cancelled = false;
@@ -199,6 +204,7 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
     searchSpecs(query).then((nextResults) => {
       if (!cancelled) {
         setResults(nextResults);
+        setActiveIndex(nextResults.length > 0 ? 0 : -1);
       }
     });
 
@@ -207,8 +213,64 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
     };
   }, [query]);
 
+  useEffect(() => {
+    const closeOnOutsidePointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !searchRef.current?.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointerDown);
+    };
+  }, []);
+
+  const updateQuery = (value: string) => {
+    setQuery(value);
+    setIsSearchOpen(value.trim().length >= 2);
+  };
+
+  const closeSearch = () => {
+    setQuery("");
+    setIsSearchOpen(false);
+    setActiveIndex(-1);
+  };
+
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      setIsSearchOpen(false);
+      setActiveIndex(-1);
+      return;
+    }
+
+    if (!hasQuery) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setIsSearchOpen(true);
+      setActiveIndex((index) => (results.length > 0 ? (index + 1 + results.length) % results.length : -1));
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsSearchOpen(true);
+      setActiveIndex((index) => (results.length > 0 ? (index - 1 + results.length) % results.length : -1));
+      return;
+    }
+
+    if (event.key === "Enter" && isOpen && activeResult) {
+      event.preventDefault();
+      closeSearch();
+      window.location.href = activeResult.spec.route;
+    }
+  };
+
   return (
     <section
+      ref={searchRef}
       className="relative overflow-visible rounded-lg border border-zinc-200 bg-white"
       aria-labelledby="spec-search-label"
     >
@@ -224,36 +286,52 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
             type="search"
             role="combobox"
             value={query}
-            onChange={(event) => setQuery(event.currentTarget.value)}
+            onChange={(event) => updateQuery(event.currentTarget.value)}
+            onFocus={() => {
+              if (hasQuery) {
+                setIsSearchOpen(true);
+              }
+            }}
+            onKeyDown={handleSearchKeyDown}
             placeholder="Find specs"
             aria-autocomplete="list"
-            aria-controls={hasQuery ? resultsId : undefined}
-            aria-expanded={hasQuery}
+            aria-activedescendant={isOpen && activeResult ? getSearchOptionId(activeResult.spec.path) : undefined}
+            aria-controls={isOpen ? resultsId : undefined}
+            aria-expanded={isOpen}
             aria-haspopup="listbox"
           />
         </div>
       </div>
-      {hasQuery ? (
+      {isOpen ? (
         <div className="absolute top-[calc(100%+0.5rem)] right-0 left-0 z-20 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg">
           <div id={resultsId} className="grid max-h-80 gap-1 overflow-auto p-2 text-sm" role="listbox">
             {results.length > 0 ? (
-              results.map((result) => (
-                <a
-                  key={result.spec.path}
-                  role="option"
-                  aria-selected={result.spec.path === currentSpecPath}
-                  className={`rounded-md px-3 py-2 no-underline ${
-                    result.spec.path === currentSpecPath
-                      ? "bg-teal-900 text-white"
-                      : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
-                  }`}
-                  href={result.spec.route}
-                  onClick={() => setQuery("")}
-                >
-                  <span className="block font-bold">{result.spec.title}</span>
-                  {result.excerpt ? <span className="mt-1 block text-xs opacity-75">{result.excerpt}</span> : null}
-                </a>
-              ))
+              results.map((result, index) => {
+                const isActive = index === activeIndex;
+                const isCurrent = result.spec.path === currentSpecPath;
+
+                return (
+                  <a
+                    key={result.spec.path}
+                    id={getSearchOptionId(result.spec.path)}
+                    role="option"
+                    aria-selected={isActive}
+                    className={`rounded-md px-3 py-2 no-underline ${
+                      isActive
+                        ? "bg-teal-900 text-white"
+                        : isCurrent
+                          ? "bg-teal-50 font-bold text-teal-950"
+                          : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+                    }`}
+                    href={result.spec.route}
+                    onClick={closeSearch}
+                    onMouseEnter={() => setActiveIndex(index)}
+                  >
+                    <span className="block font-bold">{result.spec.title}</span>
+                    {result.excerpt ? <span className="mt-1 block text-xs opacity-75">{result.excerpt}</span> : null}
+                  </a>
+                );
+              })
             ) : (
               <p className="m-0 px-3 py-2 text-sm text-zinc-500">No matching specs.</p>
             )}
@@ -262,6 +340,10 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
       ) : null}
     </section>
   );
+}
+
+function getSearchOptionId(path: string) {
+  return `spec-search-result-${path.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
 function getSectionNavigation(currentSpec: Spec) {
