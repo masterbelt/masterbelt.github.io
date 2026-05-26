@@ -130,6 +130,20 @@ a {
   font-size: 0.9em;
 }
 
+.prose a:not(.heading-anchor) {
+  color: var(--color-teal-800);
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-teal-300);
+  text-decoration-thickness: 0.08em;
+}
+
+.prose a:not(.heading-anchor):hover,
+.prose a:not(.heading-anchor):focus-visible {
+  color: var(--color-teal-950);
+  text-decoration-color: var(--color-teal-700);
+}
+
 .prose :not(pre) > code {
   border-radius: 0.25rem;
   background: var(--color-zinc-100);
