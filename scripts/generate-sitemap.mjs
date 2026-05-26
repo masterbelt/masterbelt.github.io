@@ -10,7 +10,8 @@ const htmlFiles = await collectHtmlFiles(distDir);
 const htmlUrls = htmlFiles.map((file) => toUrl(file));
 const specUrls = await readSpecUrls();
 const markdownUrls = await readMarkdownUrls();
-const urls = [...new Set([...htmlUrls, ...specUrls, ...markdownUrls])].sort((a, b) => a.localeCompare(b));
+const llmsUrls = [new URL("/llms.txt", siteUrl).toString(), new URL("/llms-full.txt", siteUrl).toString()];
+const urls = [...new Set([...htmlUrls, ...specUrls, ...markdownUrls, ...llmsUrls])].sort((a, b) => a.localeCompare(b));
 
 const sitemap = [
   '<?xml version="1.0" encoding="UTF-8"?>',

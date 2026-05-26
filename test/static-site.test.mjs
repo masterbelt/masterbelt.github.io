@@ -31,11 +31,22 @@ test("withPageMetadata writes page-specific title, description, and canonical", 
     title: "Syntax Structure | Masterbelt",
     description: 'Syntax "reference" & examples',
     canonical: "https://masterbelt.dev/spec/language/syntax/",
+    alternates: [
+      {
+        href: "https://masterbelt.dev/spec-src/language/syntax.md",
+        title: "Syntax Structure Markdown",
+        type: "text/markdown",
+      },
+    ],
   });
 
   assert.match(html, /<title>Syntax Structure \| Masterbelt<\/title>/);
   assert.match(html, /<meta name="description" content="Syntax &quot;reference&quot; &amp; examples" \/>/);
   assert.match(html, /<link rel="canonical" href="https:\/\/masterbelt.dev\/spec\/language\/syntax\/" \/>/);
+  assert.match(
+    html,
+    /<link rel="alternate" type="text\/markdown" href="https:\/\/masterbelt.dev\/spec-src\/language\/syntax.md" title="Syntax Structure Markdown" \/>/,
+  );
 });
 
 test("descriptionFromMarkdown uses the first prose paragraph", () => {
@@ -60,6 +71,7 @@ test("buildSpecMetadata derives stable per-spec metadata", () => {
     spec: {
       title: "Go Code Generation",
       route: "/spec/codegen/golang/",
+      markdownUrl: "/spec-src/codegen/golang.md",
     },
     markdown: "# Go Code Generation\n\nThis document defines the Go code generation target.",
   });
@@ -68,5 +80,12 @@ test("buildSpecMetadata derives stable per-spec metadata", () => {
     title: "Go Code Generation | Masterbelt",
     description: "This document defines the Go code generation target.",
     canonical: "https://masterbelt.dev/spec/codegen/golang/",
+    alternates: [
+      {
+        href: "https://masterbelt.dev/spec-src/codegen/golang.md",
+        title: "Go Code Generation Markdown",
+        type: "text/markdown",
+      },
+    ],
   });
 });
