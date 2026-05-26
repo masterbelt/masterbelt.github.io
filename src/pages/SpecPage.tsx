@@ -7,6 +7,7 @@ import { extractHeadings } from "../lib/markdown";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   const headings = useMemo(() => extractHeadings(markdown).filter((heading) => heading.level > 1), [markdown]);
+  const hasHeadings = headings.length > 0;
   const siblingNavigation = useMemo(() => getSiblingNavigation(spec), [spec]);
   const desktopSpecNavRef = useRef<HTMLElement | null>(null);
   const desktopCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
@@ -74,31 +75,33 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   return (
     <section className="border-t border-zinc-200">
       <div className="mx-auto grid w-[min(1280px,calc(100%-32px))] grid-cols-1 gap-10 py-10 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="grid gap-4 lg:sticky lg:top-4 lg:self-start">
-          <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
-            <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">On this page</div>
-            <nav
-              ref={headingsNavRef}
-              className="grid max-h-[30vh] gap-1 overflow-auto px-2 pb-3 text-sm"
-              aria-label="Current page headings"
-            >
-              {headings.map((heading) => (
-                <a
-                  key={heading.id}
-                  className={`rounded-md py-1.5 pr-3 no-underline ${
-                    activeHeadingId === heading.id
-                      ? "bg-teal-900 font-bold text-white"
-                      : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
-                  }`}
-                  href={`#${heading.id}`}
-                  onClick={() => setActiveHeadingId(heading.id)}
-                  style={{ paddingLeft: `${12 + Math.max(0, heading.level - 2) * 12}px` }}
-                >
-                  {heading.text}
-                </a>
-              ))}
-            </nav>
-          </section>
+        <aside className={`${hasHeadings ? "grid" : "hidden lg:grid"} gap-4 lg:sticky lg:top-4 lg:self-start`}>
+          {hasHeadings ? (
+            <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+              <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">On this page</div>
+              <nav
+                ref={headingsNavRef}
+                className="grid max-h-[30vh] gap-1 overflow-auto px-2 pb-3 text-sm"
+                aria-label="Current page headings"
+              >
+                {headings.map((heading) => (
+                  <a
+                    key={heading.id}
+                    className={`rounded-md py-1.5 pr-3 no-underline ${
+                      activeHeadingId === heading.id
+                        ? "bg-teal-900 font-bold text-white"
+                        : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+                    }`}
+                    href={`#${heading.id}`}
+                    onClick={() => setActiveHeadingId(heading.id)}
+                    style={{ paddingLeft: `${12 + Math.max(0, heading.level - 2) * 12}px` }}
+                  >
+                    {heading.text}
+                  </a>
+                ))}
+              </nav>
+            </section>
+          ) : null}
 
           <section className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white lg:block">
             <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
