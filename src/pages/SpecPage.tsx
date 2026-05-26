@@ -1,12 +1,13 @@
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { FaGithub } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaGithub } from "react-icons/fa6";
 import { LuFileText } from "react-icons/lu";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
-import { type Spec, source, specNavRows } from "../data/specs";
+import { type Spec, source, specNavRows, specs } from "../data/specs";
 import { extractHeadings } from "../lib/markdown";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   const headings = useMemo(() => extractHeadings(markdown).filter((heading) => heading.level > 1), [markdown]);
+  const siblingNavigation = useMemo(() => getSiblingNavigation(spec), [spec]);
   const desktopSpecNavRef = useRef<HTMLElement | null>(null);
   const desktopCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
   const mobileSpecNavRef = useRef<HTMLElement | null>(null);
@@ -128,6 +129,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
           </div>
 
           <MarkdownRenderer spec={spec} markdown={markdown} />
+          <SpecPager next={siblingNavigation.next} previous={siblingNavigation.previous} />
         </article>
 
         <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white lg:hidden">
@@ -142,6 +144,54 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
         </section>
       </div>
     </section>
+  );
+}
+
+function getSiblingNavigation(currentSpec: Spec) {
+  const currentDirectory = currentSpec.path.split("/").slice(0, -1).join("/");
+  const siblings = specs.filter((item) => item.path.split("/").slice(0, -1).join("/") === currentDirectory);
+  const index = siblings.findIndex((item) => item.path === currentSpec.path);
+
+  return {
+    previous: index > 0 ? siblings[index - 1] : undefined,
+    next: index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : undefined,
+  };
+}
+
+function SpecPager({ next, previous }: { next?: Spec; previous?: Spec }) {
+  if (!previous && !next) return null;
+
+  return (
+    <nav className="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Sibling specifications">
+      {previous ? (
+        <SpecPagerLink direction="previous" spec={previous} />
+      ) : (
+        <div className="hidden sm:block" aria-hidden="true" />
+      )}
+      {next ? <SpecPagerLink direction="next" spec={next} /> : null}
+    </nav>
+  );
+}
+
+function SpecPagerLink({ direction, spec }: { direction: "next" | "previous"; spec: Spec }) {
+  const isPrevious = direction === "previous";
+
+  return (
+    <a
+      className={`group flex min-h-24 items-center gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-zinc-700 no-underline hover:border-teal-700 hover:text-zinc-950 ${
+        isPrevious ? "justify-start" : "justify-end text-right"
+      }`}
+      href={spec.route}
+    >
+      {isPrevious ? <FaArrowLeft className="shrink-0 text-teal-800" aria-hidden="true" /> : null}
+      <span>
+        <span className="block text-xs font-black uppercase tracking-wide text-zinc-500">
+          {isPrevious ? "Previous" : "Next"}
+        </span>
+        <span className="mt-1 block font-bold text-zinc-950 group-hover:text-teal-900">{spec.title}</span>
+      </span>
+      {!isPrevious ? <FaArrowRight className="shrink-0 text-teal-800" aria-hidden="true" /> : null}
+    </a>
   );
 }
 
