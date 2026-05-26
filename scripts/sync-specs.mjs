@@ -23,6 +23,8 @@ const sourceManifest = await readSourceManifest(sourceManifestPath);
 const manifestDocuments = sourceManifest ? flattenManifestDocuments(sourceManifest) : [];
 const manifestDocumentsByPath = new Map(manifestDocuments.map((document) => [document.path, document]));
 const files = await collectMarkdownFiles(specDir);
+const markdownPaths = files.map((filePath) => toPosix(path.relative(specDir, filePath)));
+validateSourceManifest(sourceManifest, markdownPaths);
 const commit = await gitOutput(repoDir, ["rev-parse", "HEAD"]);
 const shortCommit = await gitOutput(repoDir, ["rev-parse", "--short", "HEAD"]);
 const syncedAt = new Date().toISOString();
@@ -109,6 +111,68 @@ async function readSourceManifest(filePath) {
     }
 
     throw error;
+  }
+}
+
+function validateSourceManifest(sourceManifest, markdownPaths) {
+  if (!sourceManifest) {
+    throw new Error(`Missing source spec manifest: ${sourceManifestPath}`);
+  }
+
+  if (!Array.isArray(sourceManifest.sections) || sourceManifest.sections.length === 0) {
+    throw new Error("Source spec manifest must contain a non-empty sections array");
+  }
+
+  const markdownPathSet = new Set(markdownPaths);
+  const manifestPathSet = new Set();
+  const errors = [];
+
+  for (const [sectionIndex, section] of sourceManifest.sections.entries()) {
+    if (!section.title) {
+      errors.push(`sections[${sectionIndex}] is missing title`);
+    }
+
+    if (!Array.isArray(section.documents) || section.documents.length === 0) {
+      errors.push(`sections[${sectionIndex}] must contain at least one document`);
+      continue;
+    }
+
+    for (const [documentIndex, document] of section.documents.entries()) {
+      const location = `sections[${sectionIndex}].documents[${documentIndex}]`;
+
+      if (!document.path) {
+        errors.push(`${location} is missing path`);
+        continue;
+      }
+
+      if (!document.path.endsWith(".md")) {
+        errors.push(`${location} path must point to a markdown file: ${document.path}`);
+      }
+
+      if (!document.title) {
+        errors.push(`${location} is missing title`);
+      }
+
+      if (manifestPathSet.has(document.path)) {
+        errors.push(`${location} duplicates ${document.path}`);
+      }
+
+      manifestPathSet.add(document.path);
+
+      if (!markdownPathSet.has(document.path)) {
+        errors.push(`${location} references missing file ${document.path}`);
+      }
+    }
+  }
+
+  for (const markdownPath of markdownPaths) {
+    if (!manifestPathSet.has(markdownPath)) {
+      errors.push(`manifest is missing ${markdownPath}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Invalid source spec manifest:\n${errors.map((error) => `- ${error}`).join("\n")}`);
   }
 }
 
