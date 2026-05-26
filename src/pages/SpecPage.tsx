@@ -269,8 +269,12 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
 
   const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Escape") {
-      setIsSearchOpen(false);
-      setActiveIndex(-1);
+      if (isSearchOpen) {
+        setIsSearchOpen(false);
+        setActiveIndex(-1);
+      } else if (query) {
+        closeSearch();
+      }
       return;
     }
 
@@ -330,6 +334,9 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
             aria-expanded={isOpen}
             aria-haspopup="listbox"
           />
+          <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[11px] font-bold text-zinc-500">
+            /
+          </kbd>
         </div>
       </div>
       {isOpen ? (
