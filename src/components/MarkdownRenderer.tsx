@@ -11,7 +11,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ spec, markdown 
   const CodeBlockForSpec = createCodeBlockComponent(spec);
 
   return (
-    <div className="prose prose-zinc w-full rounded-lg border border-zinc-200 bg-white px-8 py-9">
+    <div className="prose prose-zinc w-full">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

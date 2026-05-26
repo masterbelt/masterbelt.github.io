@@ -76,12 +76,23 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   return (
     <section className="border-t border-zinc-200">
       <div className="mx-auto grid w-[min(1280px,calc(100%-32px))] grid-cols-1 gap-10 py-10 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="grid gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:grid-rows-[auto_auto_minmax(0,1fr)] lg:self-start">
+        <aside
+          className="grid gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:grid-rows-[auto_auto_minmax(0,1fr)] lg:self-start"
+          aria-label="Specification navigation"
+        >
           <SpecSearch currentSpecPath={spec.path} />
 
           {hasHeadings ? (
-            <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
-              <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">On this page</div>
+            <section
+              className="overflow-hidden rounded-lg border border-zinc-200 bg-white"
+              aria-labelledby="page-outline-title"
+            >
+              <div
+                id="page-outline-title"
+                className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600"
+              >
+                On this page
+              </div>
               <nav
                 ref={headingsNavRef}
                 className="grid max-h-[30vh] gap-1 overflow-auto px-2 pb-3 text-sm"
@@ -106,8 +117,16 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
             </section>
           ) : null}
 
-          <section className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white lg:flex lg:min-h-0 lg:flex-col">
-            <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
+          <section
+            className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white lg:flex lg:min-h-0 lg:flex-col"
+            aria-labelledby="desktop-spec-nav-title"
+          >
+            <div
+              id="desktop-spec-nav-title"
+              className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600"
+            >
+              Specification
+            </div>
             <SpecNavigation
               ariaLabel="Spec pages"
               currentNavItemRef={desktopCurrentNavItemRef}
@@ -118,10 +137,12 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
           </section>
         </aside>
 
-        <article className="min-w-0">
-          <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-5">
+        <article className="min-w-0" aria-labelledby="spec-title">
+          <div className="rounded-lg border border-zinc-200 bg-white px-8 py-9">
             <SpecBreadcrumb spec={spec} />
-            <h1 className="m-0 text-5xl font-black leading-tight">{spec.title}</h1>
+            <h1 id="spec-title" className="m-0 text-5xl font-black leading-tight">
+              {spec.title}
+            </h1>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-600">
               <span>Synced from main@{source.shortCommit || "local"}</span>
               <a className="inline-flex items-center gap-1.5 text-teal-900" href={spec.markdownUrl}>
@@ -133,15 +154,25 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
                 Source
               </a>
             </div>
-          </div>
 
-          <MarkdownRenderer spec={spec} markdown={markdown} />
+            <div className="mt-8 border-t border-zinc-200 pt-2">
+              <MarkdownRenderer spec={spec} markdown={markdown} />
+            </div>
+          </div>
           <SpecPager next={siblingNavigation.next} previous={siblingNavigation.previous} />
           <SectionBackLink sectionNavigation={sectionNavigation} />
         </article>
 
-        <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white lg:hidden">
-          <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
+        <section
+          className="overflow-hidden rounded-lg border border-zinc-200 bg-white lg:hidden"
+          aria-labelledby="mobile-spec-nav-title"
+        >
+          <div
+            id="mobile-spec-nav-title"
+            className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600"
+          >
+            Specification
+          </div>
           <SpecNavigation
             ariaLabel="Other spec pages"
             currentNavItemRef={mobileCurrentNavItemRef}
@@ -159,11 +190,15 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
   const [query, setQuery] = useState("");
   const results = useMemo(() => searchSpecs(query), [query]);
   const hasQuery = query.trim().length >= 2;
+  const resultsId = "spec-search-results";
 
   return (
-    <section className="relative overflow-visible rounded-lg border border-zinc-200 bg-white">
+    <section
+      className="relative overflow-visible rounded-lg border border-zinc-200 bg-white"
+      aria-labelledby="spec-search-label"
+    >
       <label className="block px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600" htmlFor="spec-search">
-        Search
+        <span id="spec-search-label">Search</span>
       </label>
       <div className="px-3 pb-3">
         <div className="flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 focus-within:border-teal-700">
@@ -172,19 +207,26 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
             id="spec-search"
             className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-zinc-400"
             type="search"
+            role="combobox"
             value={query}
             onChange={(event) => setQuery(event.currentTarget.value)}
             placeholder="Find specs"
+            aria-autocomplete="list"
+            aria-controls={hasQuery ? resultsId : undefined}
+            aria-expanded={hasQuery}
+            aria-haspopup="listbox"
           />
         </div>
       </div>
       {hasQuery ? (
         <div className="absolute top-[calc(100%+0.5rem)] right-0 left-0 z-20 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg">
-          <div className="grid max-h-80 gap-1 overflow-auto p-2 text-sm">
+          <div id={resultsId} className="grid max-h-80 gap-1 overflow-auto p-2 text-sm" role="listbox">
             {results.length > 0 ? (
               results.map((result) => (
                 <a
                   key={result.spec.path}
+                  role="option"
+                  aria-selected={result.spec.path === currentSpecPath}
                   className={`rounded-md px-3 py-2 no-underline ${
                     result.spec.path === currentSpecPath
                       ? "bg-teal-900 text-white"
