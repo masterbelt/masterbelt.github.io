@@ -251,6 +251,16 @@ a {
   min-width: 1200px;
 }
 
+.mermaid-placeholder {
+  min-height: 12rem;
+  min-width: 1200px;
+  align-items: center;
+  color: var(--color-zinc-500);
+  display: flex;
+  font-size: 0.9rem;
+  justify-content: center;
+}
+
 .mermaid-controls {
   align-items: center;
   display: inline-flex;

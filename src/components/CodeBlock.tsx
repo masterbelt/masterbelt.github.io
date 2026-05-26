@@ -1,4 +1,4 @@
-import { type PointerEvent, type ReactNode, useEffect, useId, useState } from "react";
+import { type PointerEvent, type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { LuRotateCcw, LuZoomIn, LuZoomOut } from "react-icons/lu";
 import { formatLanguage, highlightCode } from "../lib/syntaxHighlight";
 
@@ -35,12 +35,42 @@ export function CodeBlock({
 
 function MermaidDiagram({ code }: { code: string }) {
   const id = useId().replaceAll(":", "");
+  const figureRef = useRef<HTMLElement | null>(null);
   const [svg, setSvg] = useState("");
   const [error, setError] = useState("");
   const [scale, setScale] = useState(1.5);
+  const [shouldRender, setShouldRender] = useState(false);
   const [drag, setDrag] = useState<{ pointerId: number; x: number; y: number; left: number; top: number } | null>(null);
 
   useEffect(() => {
+    const figure = figureRef.current;
+    if (!figure) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setShouldRender(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+
+    observer.observe(figure);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shouldRender) return;
+
     let cancelled = false;
 
     import("mermaid")
@@ -76,7 +106,7 @@ function MermaidDiagram({ code }: { code: string }) {
     return () => {
       cancelled = true;
     };
-  }, [code, id]);
+  }, [code, id, shouldRender]);
 
   if (error) {
     return (
@@ -90,7 +120,7 @@ function MermaidDiagram({ code }: { code: string }) {
   }
 
   return (
-    <figure className="mermaid-block">
+    <figure ref={figureRef} className="mermaid-block">
       <figcaption>
         <span>Mermaid</span>
         <span className="mermaid-controls">
@@ -129,6 +159,7 @@ function MermaidDiagram({ code }: { code: string }) {
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Mermaid renders SVG markup from a strict-security parser
           dangerouslySetInnerHTML={{ __html: svg }}
         />
+        {!svg && !error ? <div className="mermaid-placeholder">Loading diagram...</div> : null}
       </div>
     </figure>
   );
