@@ -413,3 +413,83 @@ a {
     font-size: 1.55rem;
   }
 }
+
+@media print {
+  @page {
+    margin: 18mm;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    background: var(--color-white);
+    color: var(--color-zinc-950);
+  }
+
+  main > section {
+    border: 0;
+  }
+
+  .heading-anchor,
+  .mermaid-controls {
+    display: none;
+  }
+
+  article > div {
+    border: 0;
+    padding: 0;
+  }
+
+  main > section > div {
+    display: block;
+    width: auto;
+    padding: 0;
+  }
+
+  article > nav,
+  article > a {
+    display: none;
+  }
+
+  header,
+  footer,
+  aside,
+  main > section > div > section {
+    display: none;
+  }
+
+  .prose {
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+
+  .prose > * {
+    max-width: none;
+  }
+
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    break-after: avoid;
+  }
+
+  .code-block,
+  .mermaid-block,
+  .prose table {
+    break-inside: avoid;
+  }
+
+  .code-block,
+  .mermaid-block {
+    border-color: var(--color-zinc-300);
+  }
+
+  .mermaid-scroll {
+    overflow: visible;
+    padding: 0.75rem;
+    touch-action: auto;
+    user-select: auto;
+  }
+}
