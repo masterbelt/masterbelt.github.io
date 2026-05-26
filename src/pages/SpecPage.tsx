@@ -7,8 +7,8 @@ import { extractHeadings } from "../lib/markdown";
 
 export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   const headings = useMemo(() => extractHeadings(markdown), [markdown]);
+  const desktopSpecNavRef = useRef<HTMLElement | null>(null);
   const desktopCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
-  const mobileCurrentNavItemRef = useRef<HTMLAnchorElement | null>(null);
   const headingsNavRef = useRef<HTMLElement | null>(null);
   const activeHeadingIdRef = useRef(headings[0]?.id ?? "");
   const [activeHeadingId, setActiveHeadingId] = useState(headings[0]?.id ?? "");
@@ -17,9 +17,14 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   useEffect(() => {
     if (!window.matchMedia("(min-width: 1024px)").matches) return;
 
-    desktopCurrentNavItemRef.current?.scrollIntoView({
-      block: "center",
-      inline: "nearest",
+    const nav = desktopSpecNavRef.current;
+    const navItem = desktopCurrentNavItemRef.current;
+    if (!nav || !navItem) return;
+
+    const targetTop = navItem.offsetTop - nav.clientHeight / 2 + navItem.clientHeight / 2;
+    nav.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior: "auto",
     });
   }, [spec.path]);
 
@@ -108,6 +113,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
               currentNavItemRef={desktopCurrentNavItemRef}
               currentSpecPath={spec.path}
               maxHeightClassName="max-h-[calc(70vh-156px)]"
+              navRef={desktopSpecNavRef}
             />
           </section>
         </aside>
@@ -134,12 +140,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
         <section className="overflow-hidden border-l border-zinc-300 bg-white lg:hidden">
           <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
-          <SpecNavigation
-            ariaLabel="Other spec pages"
-            currentNavItemRef={mobileCurrentNavItemRef}
-            currentSpecPath={spec.path}
-            maxHeightClassName="max-h-[52vh]"
-          />
+          <SpecNavigation ariaLabel="Other spec pages" currentSpecPath={spec.path} maxHeightClassName="max-h-[52vh]" />
         </section>
       </div>
     </section>
@@ -151,14 +152,20 @@ function SpecNavigation({
   currentNavItemRef,
   currentSpecPath,
   maxHeightClassName,
+  navRef,
 }: {
   ariaLabel: string;
-  currentNavItemRef: RefObject<HTMLAnchorElement | null>;
+  currentNavItemRef?: RefObject<HTMLAnchorElement | null>;
   currentSpecPath: string;
   maxHeightClassName: string;
+  navRef?: RefObject<HTMLElement | null>;
 }) {
   return (
-    <nav className={`grid gap-1 overflow-auto px-2 pb-3 text-sm ${maxHeightClassName}`} aria-label={ariaLabel}>
+    <nav
+      ref={navRef}
+      className={`grid gap-1 overflow-auto px-2 pb-3 text-sm ${maxHeightClassName}`}
+      aria-label={ariaLabel}
+    >
       {specNavRows.map((row) =>
         row.type === "section" ? (
           <div
