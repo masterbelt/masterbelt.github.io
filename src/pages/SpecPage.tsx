@@ -73,8 +73,8 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
   return (
     <section className="border-t border-zinc-200">
       <div className="mx-auto grid w-[min(1280px,calc(100%-32px))] grid-cols-1 gap-10 py-10 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="overflow-hidden border-l border-zinc-300 bg-white lg:sticky lg:top-4 lg:self-start">
-          <section className="border-b border-zinc-200">
+        <aside className="grid gap-4 lg:sticky lg:top-4 lg:self-start">
+          <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
             <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">On this page</div>
             <nav
               ref={headingsNavRef}
@@ -99,7 +99,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
             </nav>
           </section>
 
-          <section className="hidden lg:block">
+          <section className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white lg:block">
             <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
             <SpecNavigation
               ariaLabel="Spec pages"
@@ -130,7 +130,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
           <MarkdownRenderer spec={spec} markdown={markdown} />
         </article>
 
-        <section className="overflow-hidden border-l border-zinc-300 bg-white lg:hidden">
+        <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white lg:hidden">
           <div className="px-4 py-3 text-xs font-black uppercase tracking-wide text-zinc-600">Specification</div>
           <SpecNavigation
             ariaLabel="Other spec pages"
