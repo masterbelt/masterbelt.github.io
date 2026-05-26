@@ -14,7 +14,7 @@ const codeHighlightModules = import.meta.glob("../generated/code-highlights.json
 export type Spec = (typeof manifest.specs)[number];
 
 export type SpecNavRow =
-  | { type: "section"; key: string; label: string; depth: number }
+  | { type: "section"; key: string; label: string; route: string; depth: number }
   | { type: "spec"; key: string; spec: Spec; depth: number };
 
 export const specs = manifest.specs;
@@ -46,10 +46,12 @@ function buildSpecNavRows(items: Spec[]): SpecNavRow[] {
 
       if (!seenSections.has(key)) {
         seenSections.add(key);
+        const firstSpec = items.find((candidate) => candidate.segments.slice(0, index + 1).join("/") === key);
         rows.push({
           type: "section",
           key: `section:${key}`,
           label: formatSegment(segment),
+          route: firstSpec?.route ?? "#",
           depth: index,
         });
       }

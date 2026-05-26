@@ -260,13 +260,14 @@ function SpecNavigation({
     >
       {specNavRows.map((row) =>
         row.type === "section" ? (
-          <div
+          <a
             key={row.key}
-            className="mt-3 text-xs font-black uppercase tracking-wide text-zinc-500 first:mt-0"
+            className="mt-3 rounded-md py-1 text-xs font-black uppercase tracking-wide text-zinc-500 no-underline first:mt-0 hover:bg-zinc-100 hover:text-zinc-950"
+            href={row.route}
             style={{ paddingLeft: `${12 + row.depth * 12}px` }}
           >
             {row.label}
-          </div>
+          </a>
         ) : (
           <a
             key={row.key}
