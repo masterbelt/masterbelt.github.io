@@ -189,6 +189,7 @@ export function SpecPage({ spec, markdown }: { spec: Spec; markdown: string }) {
 
 function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
   const searchRef = useRef<HTMLElement | null>(null);
+  const resultsListRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SpecSearchResult[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -226,6 +227,16 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
       document.removeEventListener("pointerdown", closeOnOutsidePointerDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isOpen || !activeResult) return;
+
+    const list = resultsListRef.current;
+    const option = document.getElementById(getSearchOptionId(activeResult.spec.path));
+    if (!list || !option) return;
+
+    scrollElementIntoContainer(option, list);
+  }, [activeResult, isOpen]);
 
   const updateQuery = (value: string) => {
     setQuery(value);
@@ -305,6 +316,7 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
       {isOpen ? (
         <div className="fixed top-24 right-4 left-4 z-30 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-xl lg:absolute lg:top-[calc(100%+0.5rem)] lg:right-0 lg:left-0 lg:z-20 lg:shadow-lg">
           <div
+            ref={resultsListRef}
             id={resultsId}
             className="grid max-h-[min(70vh,32rem)] gap-1 overflow-auto p-2 text-sm lg:max-h-80"
             role="listbox"
@@ -348,6 +360,22 @@ function SpecSearch({ currentSpecPath }: { currentSpecPath: string }) {
 
 function getSearchOptionId(path: string) {
   return `spec-search-result-${path.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function scrollElementIntoContainer(element: HTMLElement, container: HTMLElement) {
+  const elementTop = element.offsetTop;
+  const elementBottom = elementTop + element.offsetHeight;
+  const visibleTop = container.scrollTop;
+  const visibleBottom = visibleTop + container.clientHeight;
+
+  if (elementTop < visibleTop) {
+    container.scrollTo({ top: elementTop, behavior: "auto" });
+    return;
+  }
+
+  if (elementBottom > visibleBottom) {
+    container.scrollTo({ top: elementBottom - container.clientHeight, behavior: "auto" });
+  }
 }
 
 function getSectionNavigation(currentSpec: Spec) {
