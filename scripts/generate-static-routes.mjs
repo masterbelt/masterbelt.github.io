@@ -20,6 +20,19 @@ const siteUrl = "https://masterbelt.dev";
 const homeHtml = render("/");
 await fs.writeFile(indexPath, withRenderedApp(indexHtml, homeHtml));
 
+const notFoundHtml = render("/404.html");
+await fs.writeFile(
+  path.join(distDir, "404.html"),
+  withRenderedApp(
+    withPageMetadata(indexHtml, {
+      title: "Page not found | Masterbelt",
+      description: "The requested Masterbelt page could not be found.",
+      canonical: new URL("/404.html", siteUrl).toString(),
+    }),
+    notFoundHtml,
+  ),
+);
+
 for (const spec of manifest.specs) {
   const routeDir = path.join(distDir, spec.route);
   const markdown = await fs.readFile(path.join(generatedSpecDir, spec.path), "utf8");
