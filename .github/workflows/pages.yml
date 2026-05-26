@@ -64,6 +64,9 @@ jobs:
       - name: Check formatting and lint
         run: pnpm biome:check
 
+      - name: Type check
+        run: pnpm check
+
       - name: Test
         run: pnpm test
 
