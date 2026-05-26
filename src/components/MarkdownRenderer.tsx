@@ -1,5 +1,5 @@
 import GithubSlugger from "github-slugger";
-import { memo, type ReactNode } from "react";
+import { type MouseEvent, memo, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { codeHighlights, type Spec } from "../data/specs";
@@ -86,12 +86,33 @@ function Heading({
 
   return (
     <Tag id={id}>
-      <a className="heading-anchor" href={`#${id}`} aria-label={`Link to ${text}`}>
+      <a
+        className="heading-anchor"
+        href={`#${id}`}
+        onClick={(event) => copyHeadingLink(event, id)}
+        aria-label={`Copy link to ${text}`}
+        title="Copy heading link"
+      >
         #
       </a>
       {children}
     </Tag>
   );
+}
+
+function copyHeadingLink(event: MouseEvent<HTMLAnchorElement>, id: string) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const url = new URL(window.location.href);
+  url.hash = id;
+  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  document.getElementById(id)?.scrollIntoView({ block: "start" });
+
+  void navigator.clipboard?.writeText(url.href).catch(() => undefined);
 }
 
 function MarkdownLink({ href, currentSpec, children }: { href?: string; currentSpec: Spec; children?: ReactNode }) {
