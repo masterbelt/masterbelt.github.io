@@ -1,0 +1,25 @@
+{
+	"name": "masterbelt.github.io",
+	"private": true,
+	"scripts": {
+		"prepare": "husky",
+		"check": "biome check",
+		"check:fix": "biome check --write"
+	},
+	"license": "MIT",
+	"packageManager": "pnpm@11.5.2",
+	"type": "module",
+	"lint-staged": {
+		"*": [
+			"biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+		]
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.16",
+		"@commitlint/cli": "^21.0.2",
+		"@commitlint/config-conventional": "^21.0.2",
+		"commitlint-config-agent-coauthor": "^1.0.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^17.0.7"
+	}
+}
