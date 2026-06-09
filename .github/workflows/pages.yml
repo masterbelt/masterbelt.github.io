@@ -1,0 +1,59 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# deploy ジョブで Pages へ書き込むため宣言（PR では deploy をスキップするので未使用）
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# main への同時デプロイは直列化（進行中は止めない）。PR ビルドは PR 毎に独立してキャンセル可
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # base path 設定。PR では Pages API を触らないようスキップ
+      - uses: actions/configure-pages@v6
+        if: github.event_name != 'pull_request'
+
+      # next build は TypeScript チェックも兼ねる（PR はここまでで検証）
+      - run: pnpm build
+
+      # 成果物アップロードはデプロイ時のみ（PR では不要）
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with:
+          path: out
+
+  deploy:
+    # PR ではデプロイしない（push / 手動実行のみ）
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
