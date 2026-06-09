@@ -1,1 +1,21 @@
 node_modules
+
+# build output
+/.next
+/out
+
+# generated content (Velite)
+/.velite
+/public/static
+
+# external content cache (future)
+/.content-cache
+
+# next types
+next-env.d.ts
+
+# typescript incremental build info
+*.tsbuildinfo
+
+# logs
+*.log
