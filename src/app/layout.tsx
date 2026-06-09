@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
+	metadataBase: new URL(siteUrl),
 	title: { default: "masterbelt", template: "%s · masterbelt" },
 	description: "React SSG で生成する静的サイト",
 };
