@@ -1,3 +1,8 @@
 {
-	"title": "Blog"
+	"title": "Blog",
+	"diagram": {
+		"zoomIn": "拡大",
+		"zoomOut": "縮小",
+		"reset": "原寸に戻す"
+	}
 }

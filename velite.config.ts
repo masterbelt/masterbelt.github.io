@@ -7,18 +7,19 @@ import { defineCollection, defineConfig, s } from "velite";
 
 /**
  * Markdown 取り込みパイプライン（明示）。
- * Velite 既定の挙動をここに書き出し、GFM 範囲外の拡張は remarkPlugins / rehypePlugins へ
- * 1 機能ずつ追加していく。
+ * 出力は MDX（= ページごとの React コンポーネント）。GFM 範囲外の拡張は
+ * remarkPlugins / rehypePlugins へ 1 機能ずつ追加していく。
  *   - gfm:            表 / 打ち消し線 / タスクリスト / 自動リンク / 脚注（remark-gfm 相当）
  *   - removeComments: <!-- ... --> を除去
  *   - copyLinkedFiles: ローカル参照ファイルを public へコピーし URL を差し替え
  */
-type MarkdownOptions = NonNullable<Parameters<typeof s.markdown>[0]>;
+type MdxOptions = NonNullable<Parameters<typeof s.mdx>[0]>;
 
 /**
  * rehype-mermaid は色を SVG に焼き込むためダーク追従できない。そこで mermaidConfig で
  * 与えた「番兵色」を、出力 SVG 内だけ CSS 変数へ置換する。インライン SVG は CSS 変数を
  * 継承するので、:root / .dark（globals.css の --mm-*）で light/dark を出し分けられる。
+ * あわせて、mermaid の SVG を <mermaid-figure> で包み、MDX 側で UI 付きコンポーネントに割り当てる。
  */
 type HastNode = {
 	type: string;
@@ -58,24 +59,37 @@ function recolorMermaidNode(node: HastNode): void {
 	for (const child of node.children ?? []) recolorMermaidNode(child);
 }
 
-/** mermaid が出力した SVG の中だけ、焼き込み色を CSS 変数へ置換する rehype プラグイン。 */
-function rehypeMermaidThemeVars() {
+/**
+ * mermaid の SVG を見つけて (1) 焼き込み色を CSS 変数へ置換し、(2) <mermaid-figure> で包む。
+ * MDX 側で components["mermaid-figure"] = MermaidFigure に割り当て、拡大縮小/スクロール UI を付ける。
+ */
+function rehypeMermaidEnhance() {
 	const visit = (node: HastNode): void => {
-		const id = node.properties?.id;
-		if (
-			node.tagName === "svg" &&
-			typeof id === "string" &&
-			id.startsWith("mermaid")
-		) {
-			recolorMermaidNode(node);
-			return;
+		for (const child of node.children ?? []) {
+			const id = child.properties?.id;
+			if (
+				child.tagName === "svg" &&
+				typeof id === "string" &&
+				id.startsWith("mermaid")
+			) {
+				recolorMermaidNode(child);
+				const wrapped: HastNode = {
+					type: "element",
+					tagName: "mermaid-figure",
+					properties: {},
+					children: [child],
+				};
+				const index = node.children?.indexOf(child) ?? -1;
+				if (node.children && index >= 0) node.children[index] = wrapped;
+				continue;
+			}
+			visit(child);
 		}
-		for (const child of node.children ?? []) visit(child);
 	};
 	return (tree: HastNode): void => visit(tree);
 }
 
-const markdownOptions: MarkdownOptions = {
+const mdxOptions: MdxOptions = {
 	gfm: true,
 	removeComments: true,
 	copyLinkedFiles: true,
@@ -88,13 +102,12 @@ const markdownOptions: MarkdownOptions = {
 		remarkEmoji,
 		// 数式 $…$ / $$…$$ をパース（HTML 描画は rehype-katex が担当）。
 		remarkMath,
-	] as unknown as MarkdownOptions["remarkPlugins"],
+	] as unknown as MdxOptions["remarkPlugins"],
 	rehypePlugins: [
 		// KaTeX で数式を描画。katex.min.css は src/app/layout.tsx で読み込む。
 		rehypeKatex,
 		// ```mermaid をビルド時に Playwright(Chromium)で SVG 化（inline-svg）。
-		// themeVariables は「番兵色」。実際の表示色は後段で CSS 変数に置換し、
-		// globals.css の :root / .dark で light/dark を出し分ける。
+		// themeVariables は「番兵色」。実際の表示色は後段で CSS 変数に置換する。
 		[
 			rehypeMermaid,
 			{
@@ -119,9 +132,9 @@ const markdownOptions: MarkdownOptions = {
 				},
 			},
 		],
-		// 上記 SVG の番兵色を CSS 変数へ置換（light/dark 出し分けの要）。
-		rehypeMermaidThemeVars,
-	] as unknown as MarkdownOptions["rehypePlugins"],
+		// 上記 SVG の色を変数化し、<mermaid-figure> で包む（light/dark + UI の要）。
+		rehypeMermaidEnhance,
+	] as unknown as MdxOptions["rehypePlugins"],
 };
 
 const posts = defineCollection({
@@ -135,7 +148,7 @@ const posts = defineCollection({
 			tags: s.array(s.string()).default([]),
 			draft: s.boolean().default(false),
 			path: s.path(),
-			content: s.markdown(markdownOptions),
+			content: s.mdx(mdxOptions),
 		})
 		.transform((data) => {
 			const slug = data.path.replace(/^posts\//, "");
