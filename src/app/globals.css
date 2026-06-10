@@ -96,3 +96,22 @@
 .dark .markdown-alert-caution {
 	--alert-accent: var(--color-red-400);
 }
+
+/*
+ * mermaid（rehype-mermaid の inline SVG）の配色。
+ * velite.config.ts が SVG 内の焼き込み色を以下の変数へ置換するので、
+ * ここで light / dark を出し分ける。インライン SVG が変数を継承する。
+ *   node = ノード塗り / cluster = サブグラフ / line = 枠線・エッジ・矢印 / text = 文字
+ */
+:root {
+	--mm-node: #e6f7f5;
+	--mm-cluster: #d4efea;
+	--mm-line: #2f8f84;
+	--mm-text: #172026;
+}
+.dark {
+	--mm-node: #21504a;
+	--mm-cluster: #18403b;
+	--mm-line: #6fd6cf;
+	--mm-text: #f8fbfa;
+}

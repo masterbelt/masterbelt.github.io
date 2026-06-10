@@ -39,6 +39,9 @@ jobs:
       # Markdown のソフトラップ禁止（proseWrap:never）を検証
       - run: pnpm lint:md
 
+      # mermaid をビルド時に SVG 化するため Chromium を用意（rehype-mermaid / Playwright）
+      - run: pnpm exec playwright install --with-deps chromium
+
       # base path 設定。PR では Pages API を触らないようスキップ
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request'

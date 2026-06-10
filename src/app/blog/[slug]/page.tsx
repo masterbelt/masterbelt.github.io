@@ -32,7 +32,7 @@ export default async function BlogPost({
 			<h1 className="text-3xl font-bold tracking-tight">{post.title}</h1>
 			<p className="mt-2 text-sm text-subtle">{post.date.slice(0, 10)}</p>
 			<div
-				className="prose prose-gray mt-8 dark:prose-invert"
+				className="prose prose-gray mt-8 max-w-none dark:prose-invert"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: Velite が生成した信頼済み HTML を描画する
 				dangerouslySetInnerHTML={{ __html: post.content }}
 			/>
