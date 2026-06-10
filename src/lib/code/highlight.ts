@@ -296,7 +296,10 @@ export function rehypeTreeSitter() {
 			const grammar = resolveGrammar(base);
 			if (!grammar) continue; // 未対応言語は素のまま
 
-			const { code: clean, annotations } = processMarkers(textOf(code));
+			// to-hast の code ハンドラが付ける末尾改行を 1 つ落とす（空の末行＝幻の行番号を防ぐ）。
+			const { code: clean, annotations } = processMarkers(
+				textOf(code).replace(/\n$/, ""),
+			);
 			const lines = await tokenize(clean, grammar);
 			if (!lines) continue;
 
