@@ -42,6 +42,19 @@ jobs:
       # mermaid をビルド時に SVG 化するため Chromium を用意（rehype-mermaid / Playwright）
       - run: pnpm exec playwright install --with-deps chromium
 
+      # tree-sitter grammar 資産（gitignore 済み・都度生成）。masterbelt の wasm ビルドは
+      # 重いので、masterbelt の grammar コミットをキーに grammars/ をキャッシュする。
+      - name: Resolve masterbelt grammar commit
+        id: grammar
+        run: echo "sha=$(git ls-remote https://github.com/masterbelt/masterbelt.git refs/heads/main | cut -f1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: grammars
+          key: grammars-${{ hashFiles('scripts/build-grammars.mjs') }}-${{ steps.grammar.outputs.sha }}
+      # masterbelt の parser.c → wasm 用に emscripten を用意（キャッシュ命中時は再ビルドされない）
+      - uses: mymindstorm/setup-emsdk@v14
+      - run: pnpm grammars
+
       # base path 設定。PR では Pages API を触らないようスキップ
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request'

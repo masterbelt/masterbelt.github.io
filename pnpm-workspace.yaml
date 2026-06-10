@@ -1,3 +1,9 @@
 allowBuilds:
+  # tree-sitter 文法はネイティブ binding をビルドしない（prebuilt .wasm のみ使用）。
+  '@tree-sitter-grammars/tree-sitter-toml': false
+  tree-sitter-c-sharp: false
+  tree-sitter-go: false
+  tree-sitter-javascript: false
+  tree-sitter-typescript: false
   esbuild: true
   sharp: true

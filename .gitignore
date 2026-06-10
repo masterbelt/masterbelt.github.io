@@ -8,6 +8,9 @@ node_modules
 /.velite
 /public/static
 
+# generated tree-sitter grammar assets (built by scripts/build-grammars.mjs)
+/grammars
+
 # external content cache (future)
 /.content-cache
 

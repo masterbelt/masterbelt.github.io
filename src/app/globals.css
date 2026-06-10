@@ -115,3 +115,70 @@
 	--mm-line: #6fd6cf;
 	--mm-text: #f8fbfa;
 }
+
+/*
+ * コードハイライト（tree-sitter, src/lib/code/highlight.ts）。
+ * .tsh = ハイライト済み <pre>。token クラスは scope の第1セグメント。色は light/dark で出し分け。
+ */
+:root {
+	--tsh-bg: #f6f8fa;
+	--tsh-fg: #1f2328;
+	--tsh-keyword: #cf222e;
+	--tsh-string: #0a3069;
+	--tsh-comment: #6e7781;
+	--tsh-function: #8250df;
+	--tsh-type: #953800;
+	--tsh-number: #0550ae;
+	--tsh-property: #0550ae;
+	--tsh-punctuation: #6e7781;
+}
+.dark {
+	--tsh-bg: #161b22;
+	--tsh-fg: #e6edf3;
+	--tsh-keyword: #ff7b72;
+	--tsh-string: #a5d6ff;
+	--tsh-comment: #8b949e;
+	--tsh-function: #d2a8ff;
+	--tsh-type: #ffa657;
+	--tsh-number: #79c0ff;
+	--tsh-property: #79c0ff;
+	--tsh-punctuation: #8b949e;
+}
+.prose pre.tsh {
+	background: var(--tsh-bg);
+	color: var(--tsh-fg);
+}
+.tsh code {
+	color: inherit;
+	background: none;
+}
+.tsh .line {
+	display: block;
+}
+.tsh .keyword {
+	color: var(--tsh-keyword);
+}
+.tsh .string {
+	color: var(--tsh-string);
+}
+.tsh .comment {
+	color: var(--tsh-comment);
+	font-style: italic;
+}
+.tsh .function {
+	color: var(--tsh-function);
+}
+.tsh .type {
+	color: var(--tsh-type);
+}
+.tsh .number,
+.tsh .constant {
+	color: var(--tsh-number);
+}
+.tsh .property {
+	color: var(--tsh-property);
+}
+.tsh .operator,
+.tsh .punctuation {
+	color: var(--tsh-punctuation);
+}

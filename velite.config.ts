@@ -4,6 +4,7 @@ import remarkEmoji from "remark-emoji";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
 import { defineCollection, defineConfig, s } from "velite";
+import { rehypeTreeSitter } from "./src/lib/code/highlight";
 
 /**
  * Markdown 取り込みパイプライン（明示）。
@@ -106,6 +107,8 @@ const mdxOptions: MdxOptions = {
 	rehypePlugins: [
 		// KaTeX で数式を描画。katex.min.css は src/app/layout.tsx で読み込む。
 		rehypeKatex,
+		// コードブロックを tree-sitter でハイライト（mermaid は除外）。
+		rehypeTreeSitter,
 		// ```mermaid をビルド時に Playwright(Chromium)で SVG 化（inline-svg）。
 		// themeVariables は「番兵色」。実際の表示色は後段で CSS 変数に置換する。
 		[
