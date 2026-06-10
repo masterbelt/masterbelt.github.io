@@ -144,11 +144,15 @@
 	--tsh-property: #79c0ff;
 	--tsh-punctuation: #8b949e;
 }
-/* ハイライト済みコードブロックの土台。余白は prose に依存せず自己完結させる
- * （code-group の中は .not-prose 配下で prose の余白が効かないため）。 */
-.prose pre.tsh {
+/* コードブロックは light/dark 追従の同じ面色に統一する（ハイライトの有無で
+ * 背景・文字色が反転しないように。typography 既定の暗背景 pre を上書き）。 */
+.prose pre {
 	background: var(--tsh-bg);
 	color: var(--tsh-fg);
+}
+/* ハイライト済みは余白を prose に依存せず自己完結させる
+ * （code-group の中は .not-prose 配下で prose の余白が効かないため）。 */
+.prose pre.tsh {
 	padding: 0;
 	overflow-x: auto;
 	/* focus の blur が上下ににじんで縦スクロールバーが出るのを防ぐ */
