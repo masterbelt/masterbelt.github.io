@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getT } from "@/i18n/server";
 import { posts } from "@/lib/content";
 
-export const metadata: Metadata = { title: "Blog" };
+const t = getT("blog");
+
+export const metadata: Metadata = { title: t("title") };
 
 export default function BlogIndex() {
 	return (
 		<>
-			<h1 className="text-2xl font-bold">Blog</h1>
+			<h1 className="text-2xl font-bold">{t("title")}</h1>
 			<ul className="mt-6 space-y-6">
 				{posts.map((post) => (
 					<li key={post.slug}>

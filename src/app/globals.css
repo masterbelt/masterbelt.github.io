@@ -1,2 +1,26 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+/*
+ * ダークモードを .dark クラス基準に切り替える（既定の prefers-color-scheme から変更）。
+ * テーマスイッチャー（src/components/theme-toggle.tsx）が html.dark を付け外しし、
+ * すべての dark: ユーティリティと下のトークン上書きがそれに追従する。
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * カラーテーマ（masterbelt/masterbelt の asset/colors.csv 由来）
+ *   light をデフォルト値として定義し、dark は html.dark で上書きする。
+ *   生成されるユーティリティ例: bg-background / text-foreground / bg-accent / text-accent
+ */
+@theme {
+	--color-background: #f8fbfa;
+	--color-foreground: #172026;
+	--color-accent: #6fd6cf;
+}
+
+.dark {
+	--color-background: #172026;
+	--color-foreground: #f8fbfa;
+	--color-accent: #6fd6cf;
+}

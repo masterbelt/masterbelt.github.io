@@ -1,15 +1,16 @@
 import Link from "next/link";
+import { getT } from "@/i18n/server";
 import { posts } from "@/lib/content";
 
 export default function Home() {
+	const t = getT("home");
+	const tc = getT(); // common（サイト共通の文言）
 	return (
 		<>
-			<h1 className="text-3xl font-bold tracking-tight">masterbelt</h1>
-			<p className="mt-4 text-gray-600 dark:text-gray-400">
-				React SSG で生成する静的サイトです。
-			</p>
+			<h1 className="text-3xl font-bold tracking-tight">{tc("siteName")}</h1>
+			<p className="mt-4 text-gray-600 dark:text-gray-400">{t("lead")}</p>
 
-			<h2 className="mt-10 text-lg font-semibold">最近の投稿</h2>
+			<h2 className="mt-10 text-lg font-semibold">{t("recentPosts")}</h2>
 			<ul className="mt-4 space-y-3">
 				{posts.slice(0, 5).map((post) => (
 					<li key={post.slug}>

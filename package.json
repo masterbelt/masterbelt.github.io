@@ -7,6 +7,7 @@
 		"typecheck": "velite && tsc --noEmit",
 		"check": "biome check",
 		"check:fix": "biome check --write",
+		"lint:i18n": "eslint .",
 		"prepare": "husky"
 	},
 	"license": "MIT",
@@ -15,18 +16,24 @@
 	"lint-staged": {
 		"*": [
 			"biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+		],
+		"src/**/*.{ts,tsx}": [
+			"eslint --max-warnings=0"
 		]
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.16",
 		"@commitlint/cli": "^21.0.2",
 		"@commitlint/config-conventional": "^21.0.2",
+		"@sanity/eslint-config-i18n": "^2.0.0",
 		"@tailwindcss/postcss": "^4.3.0",
 		"@tailwindcss/typography": "^0.5.20",
 		"@types/node": "^25.9.2",
 		"@types/react": "^19.2.17",
 		"@types/react-dom": "^19.2.3",
+		"@typescript-eslint/parser": "^8.61.0",
 		"commitlint-config-agent-coauthor": "^1.0.0",
+		"eslint": "^10.4.1",
 		"husky": "^9.1.7",
 		"lint-staged": "^17.0.7",
 		"tailwindcss": "^4.3.0",
@@ -34,8 +41,10 @@
 		"velite": "^0.3.1"
 	},
 	"dependencies": {
+		"i18next": "^26.3.1",
 		"next": "^16.2.7",
 		"react": "^19.2.7",
-		"react-dom": "^19.2.7"
+		"react-dom": "^19.2.7",
+		"react-i18next": "^17.0.8"
 	}
 }
