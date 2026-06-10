@@ -26,6 +26,10 @@ const GRAMMAR_ALIASES: Record<string, string> = {
 	cs: "csharp",
 	csharp: "csharp",
 	toml: "toml",
+	bash: "bash",
+	sh: "bash",
+	shell: "bash",
+	zsh: "bash",
 	belt: "masterbelt",
 	masterbelt: "masterbelt",
 };
@@ -310,8 +314,11 @@ export function rehypeTreeSitter() {
 
 			pre.properties ??= {};
 			pre.properties.className = [...preClasses];
+			// 行番号の開始値。counter-reset は <code> 側に置く（CSS の .tsh code の
+			// counter-reset で上書きされないよう、同じ要素で指定する）。
 			if (block.start !== 1) {
-				pre.properties.style = `${pre.properties.style ? `${pre.properties.style};` : ""}counter-reset:line ${block.start - 1}`;
+				codeEl.properties = codeEl.properties ?? {};
+				codeEl.properties.style = `counter-reset:line ${block.start - 1}`;
 			}
 
 			const children: HastNode[] = [];

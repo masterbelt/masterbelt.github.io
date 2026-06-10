@@ -47,6 +47,10 @@ const NPM_LANGS = {
 		wasm: "@tree-sitter-grammars/tree-sitter-toml/tree-sitter-toml.wasm",
 		queries: ["@tree-sitter-grammars/tree-sitter-toml/queries/highlights.scm"],
 	},
+	bash: {
+		wasm: "tree-sitter-bash/tree-sitter-bash.wasm",
+		queries: ["tree-sitter-bash/queries/highlights.scm"],
+	},
 };
 
 function ensureDir(dir) {

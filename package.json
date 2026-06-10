@@ -46,6 +46,7 @@
 		"prettier": "^3.8.3",
 		"rehype-mermaid": "^3.0.0",
 		"tailwindcss": "^4.3.0",
+		"tree-sitter-bash": "^0.25.1",
 		"tree-sitter-c-sharp": "^0.23.5",
 		"tree-sitter-go": "^0.25.0",
 		"tree-sitter-javascript": "^0.25.0",

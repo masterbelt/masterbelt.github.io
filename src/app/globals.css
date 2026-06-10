@@ -144,17 +144,32 @@
 	--tsh-property: #79c0ff;
 	--tsh-punctuation: #8b949e;
 }
+/* ハイライト済みコードブロックの土台。余白は prose に依存せず自己完結させる
+ * （code-group の中は .not-prose 配下で prose の余白が効かないため）。 */
 .prose pre.tsh {
 	background: var(--tsh-bg);
 	color: var(--tsh-fg);
+	padding: 0;
+	overflow-x: auto;
+	/* focus の blur が上下ににじんで縦スクロールバーが出るのを防ぐ */
+	overflow-y: hidden;
 }
 .tsh code {
+	display: block;
+	width: max-content;
+	min-width: 100%;
+	padding-block: 0.85rem;
 	color: inherit;
 	background: none;
+	counter-reset: line;
 }
 .tsh .line {
 	display: block;
+	position: relative;
+	padding-inline: 1rem;
 }
+
+/* トークン配色 */
 .tsh .keyword {
 	color: var(--tsh-keyword);
 }
@@ -183,7 +198,7 @@
 	color: var(--tsh-punctuation);
 }
 
-/* 拡張コードブロック: タイトル / 行番号 / 行ハイライト / diff / focus / error・warning */
+/* 拡張: タイトル / 行番号 / 行ハイライト / diff / focus / error・warning */
 :root {
 	--tsh-line-hl: rgba(99, 110, 123, 0.12);
 	--tsh-line-add: rgba(26, 127, 55, 0.15);
@@ -204,26 +219,14 @@
 	font-size: 0.8em;
 	color: var(--tsh-comment);
 }
-/* 行は overflow 全幅に背景が乗るよう、code を最小幅 max-content のブロックにする */
-.tsh code {
-	display: block;
-	width: max-content;
-	min-width: 100%;
-	counter-reset: line;
-}
-.tsh .line {
-	display: block;
-	padding-inline: 1rem;
-	margin-inline: -1rem;
-}
 .tsh.line-numbers .line {
-	padding-left: 3.2rem;
+	padding-left: 3rem;
 }
 .tsh.line-numbers .line::before {
 	counter-increment: line;
 	content: counter(line);
 	position: absolute;
-	margin-left: -2.6rem;
+	left: 0;
 	width: 2rem;
 	text-align: right;
 	color: var(--tsh-comment);
@@ -247,26 +250,25 @@
 	background: var(--tsh-line-rm);
 	box-shadow: inset 2px 0 var(--color-red-500);
 }
-/* focus: フォーカス行以外を薄く（ホバーで解除） */
+/* focus: 該当行以外をぼかして淡く（ホバーで解除） */
 .tsh.has-focus .line:not(.focused) {
-	opacity: 0.45;
-	filter: blur(0.4px);
+	filter: blur(2px);
+	opacity: 0.5;
 	transition:
-		opacity 0.2s,
-		filter 0.2s;
+		filter 0.2s,
+		opacity 0.2s;
 }
 .tsh.has-focus:hover .line:not(.focused) {
-	opacity: 1;
 	filter: none;
+	opacity: 1;
 }
 
-/* code-group（CodeGroup）内: タブが見出しを担うので per-block のタイトルと枠は消す */
-[role="tablist"] + div .tsh,
+/* code-group 内: タブが見出しを兼ねるので per-block のタイトルと枠は消す（余白は code 側で確保済み） */
 [role="tablist"] ~ div .tsh {
 	margin: 0;
 	border: 0;
 	border-radius: 0;
 }
-.not-prose [role="tablist"] ~ div .tsh-title {
+[role="tablist"] ~ div .tsh-title {
 	display: none;
 }
