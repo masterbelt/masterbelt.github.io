@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { I18nProvider } from "@/i18n/provider";
 import { getT } from "@/i18n/server";
 import { siteUrl } from "@/lib/site";
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
 const t = getT();

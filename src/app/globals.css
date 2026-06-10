@@ -38,3 +38,61 @@
 	/* subtle は両モード共通なので上書きしない（gray-500） */
 	--color-link: var(--color-blue-400);
 }
+
+/*
+ * GitHub Alert（remark-github-blockquote-alert が生成する .markdown-alert-*）。
+ * 記事本文（.prose）内に出る。種別色は Tailwind パレットを参照し、dark で明度を上げる。
+ */
+.markdown-alert {
+	margin-block: 1rem;
+	padding: 0.5rem 1rem;
+	border-left: 0.25rem solid var(--alert-accent);
+	border-radius: 0.25rem;
+	background: color-mix(in srgb, var(--alert-accent) 8%, transparent);
+}
+.markdown-alert > :first-child {
+	margin-top: 0;
+}
+.markdown-alert > :last-child {
+	margin-bottom: 0;
+}
+.markdown-alert-title {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 600;
+	color: var(--alert-accent);
+}
+.markdown-alert-title .octicon {
+	fill: currentColor;
+}
+.markdown-alert-note {
+	--alert-accent: var(--color-blue-600);
+}
+.markdown-alert-tip {
+	--alert-accent: var(--color-green-600);
+}
+.markdown-alert-important {
+	--alert-accent: var(--color-violet-600);
+}
+.markdown-alert-warning {
+	--alert-accent: var(--color-amber-600);
+}
+.markdown-alert-caution {
+	--alert-accent: var(--color-red-600);
+}
+.dark .markdown-alert-note {
+	--alert-accent: var(--color-blue-400);
+}
+.dark .markdown-alert-tip {
+	--alert-accent: var(--color-green-400);
+}
+.dark .markdown-alert-important {
+	--alert-accent: var(--color-violet-400);
+}
+.dark .markdown-alert-warning {
+	--alert-accent: var(--color-amber-400);
+}
+.dark .markdown-alert-caution {
+	--alert-accent: var(--color-red-400);
+}
