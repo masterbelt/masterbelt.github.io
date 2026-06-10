@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 			</head>
 			<body className="min-h-dvh bg-background text-foreground antialiased">
 				<I18nProvider>
-					<header className="border-b border-gray-200 dark:border-gray-800">
+					<header className="border-b border-border">
 						<nav className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
 							<Link href="/" className="font-semibold">
 								{t("siteName")}
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 							<div className="flex items-center gap-4">
 								<Link
 									href="/blog"
-									className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+									className="text-sm text-muted transition-colors hover:text-foreground"
 								>
 									{t("nav.blog")}
 								</Link>
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 						</nav>
 					</header>
 					<main className="mx-auto max-w-3xl px-4 py-10">{children}</main>
-					<footer className="mx-auto max-w-3xl px-4 py-10 text-sm text-gray-500">
+					<footer className="mx-auto max-w-3xl px-4 py-10 text-sm text-subtle">
 						{t("footer.copyright")}
 					</footer>
 				</I18nProvider>

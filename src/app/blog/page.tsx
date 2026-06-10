@@ -20,13 +20,9 @@ export default function BlogIndex() {
 						>
 							{post.title}
 						</Link>
-						<p className="mt-1 text-sm text-gray-500">
-							{post.date.slice(0, 10)}
-						</p>
+						<p className="mt-1 text-sm text-subtle">{post.date.slice(0, 10)}</p>
 						{post.description ? (
-							<p className="mt-2 text-gray-600 dark:text-gray-400">
-								{post.description}
-							</p>
+							<p className="mt-2 text-muted">{post.description}</p>
 						) : null}
 					</li>
 				))}

@@ -8,19 +8,33 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * カラーテーマ（masterbelt/masterbelt の asset/colors.csv 由来）
- *   light をデフォルト値として定義し、dark は html.dark で上書きする。
- *   生成されるユーティリティ例: bg-background / text-foreground / bg-accent / text-accent
- */
 @theme {
+	/*
+	 * ブランドカラー（masterbelt/masterbelt の asset/colors.csv 由来）。
+	 */
 	--color-background: #f8fbfa;
 	--color-foreground: #172026;
 	--color-accent: #6fd6cf;
+
+	/*
+	 * セマンティックトークン（UI 上の役割で定義する）。
+	 * tsx 側は gray/blue を直書きせず、この役割名で参照する（例: border-border / text-muted）。
+	 * 値は light。dark は下の .dark で上書きする。
+	 *   border = 区切り線 / muted = 補助テキスト / subtle = メタ情報 / link = リンク
+	 */
+	--color-border: var(--color-gray-200);
+	--color-muted: var(--color-gray-600);
+	--color-subtle: var(--color-gray-500);
+	--color-link: var(--color-blue-600);
 }
 
 .dark {
 	--color-background: #172026;
 	--color-foreground: #f8fbfa;
 	--color-accent: #6fd6cf;
+
+	--color-border: var(--color-gray-800);
+	--color-muted: var(--color-gray-400);
+	/* subtle は両モード共通なので上書きしない（gray-500） */
+	--color-link: var(--color-blue-400);
 }
