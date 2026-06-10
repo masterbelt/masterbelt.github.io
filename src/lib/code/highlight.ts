@@ -1,9 +1,12 @@
 /**
- * ビルド時シンタックスハイライト（web-tree-sitter）。
+ * ビルド時シンタックスハイライト（web-tree-sitter）+ VitePress 風の拡張コードブロック。
  *
- * grammars/<grammar>/parser.wasm + highlights.scm（scripts/build-grammars.mjs が生成）を読み、
- * tree-sitter のクエリ capture をトークン span（CSS クラス = scope の第1セグメント）へ変換する。
- * 出力は静的 HTML(hast)なのでブラウザに tree-sitter は不要。
+ * - ハイライト: grammars/<grammar>/parser.wasm + highlights.scm（scripts/build-grammars.mjs 生成）を
+ *   読み、tree-sitter のクエリ capture をトークン span（CSS クラス = scope の第1セグメント）へ変換。
+ *   出力は静的 HTML(hast) なのでブラウザに tree-sitter は不要。CJK のオフセットも一致。
+ * - 拡張機能: 行番号 / `{1,3-5}` 行ハイライト / `[!code highlight|focus|++|--|error|warning]` / タイトル。
+ *   すべて rehype 段で行う。code ハンドラが残す <code> の data.meta と className、コードテキストから解析する
+ *   （remark で code ノードに hProperties を載せても to-hast の code ハンドラに無視されるため）。
  *
  * 言語追加: scripts/build-grammars.mjs に文法を足し、下の GRAMMAR_ALIASES に別名を足すだけ。
  */
@@ -57,7 +60,7 @@ async function loadGrammar(grammar: string): Promise<Loaded | null> {
 	return loaded;
 }
 
-export function resolveGrammar(lang: string | null | undefined): string | null {
+function resolveGrammar(lang: string | null | undefined): string | null {
 	if (!lang) return null;
 	return GRAMMAR_ALIASES[lang.toLowerCase()] ?? null;
 }
@@ -76,7 +79,6 @@ async function tokenize(
 	const tree = parser.parse(code);
 	if (!tree) return null;
 	const captures = loaded.query.captures(tree.rootNode);
-	// 文字ごとの scope を決める。外側→内側の順で書き込み、内側（より具体的）が勝つ。
 	const scopes: (string | null)[] = new Array(code.length).fill(null);
 	captures.sort(
 		(a, b) =>
@@ -119,11 +121,108 @@ async function tokenize(
 	return lines;
 }
 
+// ---- メタ / マーカー解析 ------------------------------------------------------
+
+type LineKind =
+	| "highlighted"
+	| "focused"
+	| "add"
+	| "remove"
+	| "error"
+	| "warning";
+
+type BlockMeta = {
+	lineNumbers: boolean;
+	start: number;
+	highlight: Set<number>; // 1-based
+	title: string | null;
+};
+
+const MARKER_RE =
+	/\s*(?:\/\/|#|--|;|\/\*|<!--)?\s*\[!code\s+(\+\+|--|highlight|focus|error|warning)(?::(\d+))?\]\s*(?:\*\/|-->)?\s*$/;
+
+const MARKER_KIND: Record<string, LineKind> = {
+	"++": "add",
+	"--": "remove",
+	highlight: "highlighted",
+	focus: "focused",
+	error: "error",
+	warning: "warning",
+};
+
+const KIND_CLASSES: Record<LineKind, string[]> = {
+	highlighted: ["highlighted"],
+	focused: ["focused"],
+	add: ["diff", "add"],
+	remove: ["diff", "remove"],
+	error: ["error"],
+	warning: ["warning"],
+};
+
+function parseRanges(spec: string): number[] {
+	const out: number[] = [];
+	for (const part of spec.split(",")) {
+		const m = part.trim().match(/^(\d+)(?:-(\d+))?$/);
+		if (!m) continue;
+		const lo = Number(m[1]);
+		const hi = m[2] ? Number(m[2]) : lo;
+		for (let n = lo; n <= hi; n++) out.push(n);
+	}
+	return out;
+}
+
+/** lang(className 由来) と meta 文字列からブロック設定を解析する。 */
+function parseMeta(
+	lang: string,
+	meta: string,
+): { base: string; block: BlockMeta } {
+	const base = lang.split(":")[0].toLowerCase();
+	const lnSrc = `${lang} ${meta}`;
+	const ln = lnSrc.match(/:line-numbers(?:=(\d+))?/);
+	const range = meta.match(/\{([\d,\-\s]+)\}/);
+	const title = meta.match(/\[([^\]]+)\]/);
+	return {
+		base,
+		block: {
+			lineNumbers: ln !== null,
+			start: ln?.[1] ? Number(ln[1]) : 1,
+			highlight: new Set(range ? parseRanges(range[1]) : []),
+			title: title ? title[1] : null,
+		},
+	};
+}
+
+/** コードテキストから `[!code ...]` マーカーを除去し、行注釈を返す。 */
+function processMarkers(code: string): {
+	code: string;
+	annotations: Map<number, Set<LineKind>>;
+} {
+	const lines = code.split("\n");
+	const annotations = new Map<number, Set<LineKind>>();
+	const add = (i: number, kind: LineKind) => {
+		const set = annotations.get(i) ?? new Set<LineKind>();
+		set.add(kind);
+		annotations.set(i, set);
+	};
+	for (let i = 0; i < lines.length; i++) {
+		const m = lines[i].match(MARKER_RE);
+		if (!m || m.index === undefined) continue;
+		const kind = MARKER_KIND[m[1]];
+		const count = m[2] ? Number(m[2]) : 1;
+		lines[i] = lines[i].slice(0, m.index);
+		for (let k = 0; k < count && i + k < lines.length; k++) add(i + k, kind);
+	}
+	return { code: lines.join("\n"), annotations };
+}
+
+// ---- rehype プラグイン --------------------------------------------------------
+
 type HastNode = {
 	type: string;
 	tagName?: string;
 	value?: string;
 	properties?: Record<string, unknown>;
+	data?: { meta?: string };
 	children?: HastNode[];
 };
 
@@ -135,62 +234,97 @@ const textOf = (node: HastNode): string =>
 		? (node.value ?? "")
 		: (node.children ?? []).map(textOf).join("");
 
-function buildLineSpans(lines: Token[][]): HastNode[] {
-	return lines.map((tokens) => ({
+function buildCodeElement(
+	lines: Token[][],
+	block: BlockMeta,
+	annotations: Map<number, Set<LineKind>>,
+): HastNode {
+	const lineNodes: HastNode[] = lines.map((tokens, i) => {
+		const classes = new Set<string>(["line"]);
+		if (block.highlight.has(i + 1)) classes.add("highlighted");
+		for (const kind of annotations.get(i) ?? []) {
+			for (const c of KIND_CLASSES[kind]) classes.add(c);
+		}
+		return {
+			type: "element",
+			tagName: "span",
+			properties: { className: [...classes] },
+			children: tokens.map((t) =>
+				t.scope
+					? {
+							type: "element",
+							tagName: "span",
+							properties: { className: [t.scope] },
+							children: [{ type: "text", value: t.text }],
+						}
+					: { type: "text", value: t.text },
+			),
+		};
+	});
+	return {
 		type: "element",
-		tagName: "span",
-		properties: { className: ["line"] },
-		children: tokens.map((t) =>
-			t.scope
-				? {
-						type: "element",
-						tagName: "span",
-						properties: { className: [t.scope] },
-						children: [{ type: "text", value: t.text }],
-					}
-				: { type: "text", value: t.text },
-		),
-	}));
+		tagName: "code",
+		properties: {},
+		children: lineNodes,
+	};
 }
 
-/** rehype プラグイン: <pre><code class="language-X"> をビルド時にハイライトする。 */
+/** rehype プラグイン: <pre><code class="language-X"> をハイライト + 拡張整形する。 */
 export function rehypeTreeSitter() {
 	return async (tree: HastNode) => {
-		const targets: { code: HastNode; pre: HastNode; lang: string }[] = [];
+		const targets: { code: HastNode; pre: HastNode }[] = [];
 		const walk = (node: HastNode, parent: HastNode | null) => {
-			if (
-				node.tagName === "code" &&
-				parent?.tagName === "pre" &&
-				node.properties
-			) {
-				const langClass = asArray(node.properties.className).find((c) =>
-					c.startsWith("language-"),
-				);
-				if (langClass) {
-					targets.push({
-						code: node,
-						pre: parent,
-						lang: langClass.slice("language-".length),
-					});
-				}
+			if (node.tagName === "code" && parent?.tagName === "pre") {
+				targets.push({ code: node, pre: parent });
 			}
 			for (const child of node.children ?? []) walk(child, node);
 		};
 		walk(tree, null);
 
-		for (const { code, pre, lang } of targets) {
-			if (lang === "mermaid") continue; // mermaid は rehype-mermaid が処理
-			const grammar = resolveGrammar(lang);
+		for (const { code, pre } of targets) {
+			const langClass = asArray(code.properties?.className).find((c) =>
+				c.startsWith("language-"),
+			);
+			if (!langClass) continue;
+			const rawLang = langClass.slice("language-".length);
+			if (rawLang === "mermaid") continue; // mermaid は rehype-mermaid が処理
+			const { base, block } = parseMeta(rawLang, code.data?.meta ?? "");
+			const grammar = resolveGrammar(base);
 			if (!grammar) continue; // 未対応言語は素のまま
-			const lines = await tokenize(textOf(code), grammar);
+
+			const { code: clean, annotations } = processMarkers(textOf(code));
+			const lines = await tokenize(clean, grammar);
 			if (!lines) continue;
-			code.children = buildLineSpans(lines);
-			pre.properties = pre.properties ?? {};
-			pre.properties.className = [
-				...asArray(pre.properties.className),
+
+			const codeEl = buildCodeElement(lines, block, annotations);
+			const preClasses = new Set([
+				...asArray(pre.properties?.className),
 				"tsh",
 				`language-${grammar}`,
-			];
+			]);
+			if (block.lineNumbers) preClasses.add("line-numbers");
+			let hasFocus = false;
+			for (const set of annotations.values())
+				if (set.has("focused")) hasFocus = true;
+			if (hasFocus) preClasses.add("has-focus");
+
+			pre.properties ??= {};
+			pre.properties.className = [...preClasses];
+			if (block.start !== 1) {
+				pre.properties.style = `${pre.properties.style ? `${pre.properties.style};` : ""}counter-reset:line ${block.start - 1}`;
+			}
+
+			const children: HastNode[] = [];
+			if (block.title) {
+				children.push({
+					type: "element",
+					tagName: "div",
+					properties: { className: ["tsh-title"] },
+					children: [{ type: "text", value: block.title }],
+				});
+			}
+			children.push(codeEl);
+			pre.children = children;
 		}
 	};
 }

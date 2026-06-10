@@ -182,3 +182,80 @@
 .tsh .punctuation {
 	color: var(--tsh-punctuation);
 }
+
+/* 拡張コードブロック: タイトル / 行番号 / 行ハイライト / diff / focus / error・warning */
+:root {
+	--tsh-line-hl: rgba(99, 110, 123, 0.12);
+	--tsh-line-add: rgba(26, 127, 55, 0.15);
+	--tsh-line-rm: rgba(207, 34, 46, 0.15);
+	--tsh-line-err: rgba(207, 34, 46, 0.12);
+	--tsh-line-warn: rgba(154, 103, 0, 0.14);
+}
+.dark {
+	--tsh-line-hl: rgba(177, 186, 196, 0.12);
+	--tsh-line-add: rgba(63, 185, 80, 0.16);
+	--tsh-line-rm: rgba(248, 81, 73, 0.16);
+	--tsh-line-err: rgba(248, 81, 73, 0.14);
+	--tsh-line-warn: rgba(210, 153, 34, 0.16);
+}
+.tsh-title {
+	border-bottom: 1px solid var(--color-border);
+	padding: 0.4rem 1rem;
+	font-size: 0.8em;
+	color: var(--tsh-comment);
+}
+/* 行は overflow 全幅に背景が乗るよう、code を最小幅 max-content のブロックにする */
+.tsh code {
+	display: block;
+	width: max-content;
+	min-width: 100%;
+	counter-reset: line;
+}
+.tsh .line {
+	display: block;
+	padding-inline: 1rem;
+	margin-inline: -1rem;
+}
+.tsh.line-numbers .line {
+	padding-left: 3.2rem;
+}
+.tsh.line-numbers .line::before {
+	counter-increment: line;
+	content: counter(line);
+	position: absolute;
+	margin-left: -2.6rem;
+	width: 2rem;
+	text-align: right;
+	color: var(--tsh-comment);
+	opacity: 0.6;
+}
+.tsh .line.highlighted {
+	background: var(--tsh-line-hl);
+}
+.tsh .line.error {
+	background: var(--tsh-line-err);
+}
+.tsh .line.warning {
+	background: var(--tsh-line-warn);
+}
+/* diff は背景色 + 左ボーダーで示す（行番号カウンタの ::before と衝突しないよう擬似要素は使わない） */
+.tsh .line.diff.add {
+	background: var(--tsh-line-add);
+	box-shadow: inset 2px 0 var(--color-green-500);
+}
+.tsh .line.diff.remove {
+	background: var(--tsh-line-rm);
+	box-shadow: inset 2px 0 var(--color-red-500);
+}
+/* focus: フォーカス行以外を薄く（ホバーで解除） */
+.tsh.has-focus .line:not(.focused) {
+	opacity: 0.45;
+	filter: blur(0.4px);
+	transition:
+		opacity 0.2s,
+		filter 0.2s;
+}
+.tsh.has-focus:hover .line:not(.focused) {
+	opacity: 1;
+	filter: none;
+}
