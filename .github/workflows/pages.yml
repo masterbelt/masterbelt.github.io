@@ -36,6 +36,9 @@ jobs:
       # 文言の直書き禁止（i18n）を検証。pre-commit を迂回したコミットもここで弾く
       - run: pnpm lint:i18n
 
+      # Markdown のソフトラップ禁止（proseWrap:never）を検証
+      - run: pnpm lint:md
+
       # base path 設定。PR では Pages API を触らないようスキップ
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request'
