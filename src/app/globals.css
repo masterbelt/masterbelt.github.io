@@ -259,3 +259,14 @@
 	opacity: 1;
 	filter: none;
 }
+
+/* code-group（CodeGroup）内: タブが見出しを担うので per-block のタイトルと枠は消す */
+[role="tablist"] + div .tsh,
+[role="tablist"] ~ div .tsh {
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+}
+.not-prose [role="tablist"] ~ div .tsh-title {
+	display: none;
+}

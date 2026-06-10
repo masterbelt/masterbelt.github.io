@@ -316,6 +316,8 @@ export function rehypeTreeSitter() {
 
 			const children: HastNode[] = [];
 			if (block.title) {
+				// code-group のタブ label 用に data-title でも持たせる（CodeGroup が読む）。
+				pre.properties.dataTitle = block.title;
 				children.push({
 					type: "element",
 					tagName: "div",
@@ -326,5 +328,31 @@ export function rehypeTreeSitter() {
 			children.push(codeEl);
 			pre.children = children;
 		}
+	};
+}
+
+// ---- code groups（:::code-group → タブ） --------------------------------------
+
+type MdastNode = {
+	type: string;
+	name?: string;
+	data?: Record<string, unknown>;
+	children?: MdastNode[];
+};
+
+/** remark プラグイン: `:::code-group` を <mb-code-group>（MDX で CodeGroup に割当）へ変換する。 */
+export function remarkCodeGroup() {
+	return (tree: MdastNode) => {
+		const walk = (node: MdastNode) => {
+			if (node.type === "containerDirective" && node.name === "code-group") {
+				node.data = {
+					...(node.data ?? {}),
+					hName: "mb-code-group",
+					hProperties: {},
+				};
+			}
+			for (const child of node.children ?? []) walk(child);
+		};
+		walk(tree);
 	};
 }

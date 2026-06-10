@@ -1,10 +1,11 @@
 import rehypeKatex from "rehype-katex";
 import rehypeMermaid from "rehype-mermaid";
+import remarkDirective from "remark-directive";
 import remarkEmoji from "remark-emoji";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
 import { defineCollection, defineConfig, s } from "velite";
-import { rehypeTreeSitter } from "./src/lib/code/highlight";
+import { rehypeTreeSitter, remarkCodeGroup } from "./src/lib/code/highlight";
 
 /**
  * Markdown 取り込みパイプライン（明示）。
@@ -103,6 +104,9 @@ const mdxOptions: MdxOptions = {
 		remarkEmoji,
 		// 数式 $…$ / $$…$$ をパース（HTML 描画は rehype-katex が担当）。
 		remarkMath,
+		// :::code-group などのディレクティブを解析し、code-group をタブ要素へ変換。
+		remarkDirective,
+		remarkCodeGroup,
 	] as unknown as MdxOptions["remarkPlugins"],
 	rehypePlugins: [
 		// KaTeX で数式を描画。katex.min.css は src/app/layout.tsx で読み込む。

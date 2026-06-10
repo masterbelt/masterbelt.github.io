@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import * as runtime from "react/jsx-runtime";
+import { CodeGroup } from "./code-group";
 import { MermaidFigure } from "./mermaid-figure";
 
 type MdxComponents = Record<string, ComponentType<Record<string, unknown>>>;
@@ -12,6 +13,8 @@ type MdxComponents = Record<string, ComponentType<Record<string, unknown>>>;
 const components = {
 	// mermaid 図に拡大縮小/スクロール UI を付与する（velite が <mermaid-figure> で包む）。
 	"mermaid-figure": MermaidFigure,
+	// :::code-group をタブ表示にする（velite が <mb-code-group> へ変換）。
+	"mb-code-group": CodeGroup,
 } as unknown as MdxComponents;
 
 function evaluateMdx(code: string) {
