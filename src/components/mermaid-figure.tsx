@@ -85,33 +85,7 @@ export function MermaidFigure({ children }: { children?: ReactNode }) {
 		"grid size-7 place-items-center rounded text-foreground transition-colors hover:bg-foreground/10";
 
 	return (
-		<figure className="not-prose my-6 overflow-hidden rounded-md border border-border">
-			<div className="flex items-center justify-end gap-1 border-b border-border px-2 py-1">
-				<button
-					type="button"
-					onClick={() => zoom(1 / STEP)}
-					aria-label={t("diagram.zoomOut")}
-					className={buttonClass}
-				>
-					<ZoomOut className="size-4" aria-hidden="true" />
-				</button>
-				<button
-					type="button"
-					onClick={() => setScale(1)}
-					aria-label={t("diagram.reset")}
-					className={buttonClass}
-				>
-					<Maximize className="size-4" aria-hidden="true" />
-				</button>
-				<button
-					type="button"
-					onClick={() => zoom(STEP)}
-					aria-label={t("diagram.zoomIn")}
-					className={buttonClass}
-				>
-					<ZoomIn className="size-4" aria-hidden="true" />
-				</button>
-			</div>
+		<figure className="relative not-prose my-6 overflow-hidden rounded-md border border-border">
 			<div
 				ref={viewportRef}
 				onPointerDown={onPointerDown}
@@ -139,6 +113,33 @@ export function MermaidFigure({ children }: { children?: ReactNode }) {
 						{children}
 					</div>
 				</div>
+			</div>
+			{/* 右下のフローティング操作ボタン（ビューポート外なのでスクロールに追従しない） */}
+			<div className="absolute right-2 bottom-2 flex items-center gap-1 rounded-md border border-border bg-background/80 p-1 shadow-sm backdrop-blur">
+				<button
+					type="button"
+					onClick={() => zoom(1 / STEP)}
+					aria-label={t("diagram.zoomOut")}
+					className={buttonClass}
+				>
+					<ZoomOut className="size-4" aria-hidden="true" />
+				</button>
+				<button
+					type="button"
+					onClick={() => setScale(1)}
+					aria-label={t("diagram.reset")}
+					className={buttonClass}
+				>
+					<Maximize className="size-4" aria-hidden="true" />
+				</button>
+				<button
+					type="button"
+					onClick={() => zoom(STEP)}
+					aria-label={t("diagram.zoomIn")}
+					className={buttonClass}
+				>
+					<ZoomIn className="size-4" aria-hidden="true" />
+				</button>
 			</div>
 		</figure>
 	);
