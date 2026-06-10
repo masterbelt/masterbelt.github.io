@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import * as runtime from "react/jsx-runtime";
+import { CodeBlock } from "./code-block";
 import { CodeGroup } from "./code-group";
 import { MermaidFigure } from "./mermaid-figure";
 
@@ -15,6 +16,8 @@ const components = {
 	"mermaid-figure": MermaidFigure,
 	// :::code-group をタブ表示にする（velite が <mb-code-group> へ変換）。
 	"mb-code-group": CodeGroup,
+	// コードブロックに Copy ボタンを付ける。
+	pre: CodeBlock,
 } as unknown as MdxComponents;
 
 function evaluateMdx(code: string) {

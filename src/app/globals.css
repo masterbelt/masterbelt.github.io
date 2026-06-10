@@ -267,7 +267,44 @@
 	opacity: 1;
 }
 
+/* Copy ボタン付きラッパー（CodeBlock）。pre の余白はラッパーへ移す。 */
+.tsh-wrap {
+	position: relative;
+	margin-block: 1.25rem;
+}
+.tsh-wrap > pre {
+	margin: 0;
+}
+.tsh-copy {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.375rem;
+	background: var(--tsh-bg);
+	color: var(--tsh-comment);
+	opacity: 0;
+	transition:
+		opacity 0.15s,
+		color 0.15s;
+}
+.tsh-wrap:hover .tsh-copy,
+.tsh-copy:focus-visible {
+	opacity: 1;
+}
+.tsh-copy:hover {
+	color: var(--tsh-fg);
+}
+
 /* code-group 内: タブが見出しを兼ねるので per-block のタイトルと枠は消す（余白は code 側で確保済み） */
+[role="tablist"] ~ div .tsh-wrap {
+	margin: 0;
+}
 [role="tablist"] ~ div .tsh {
 	margin: 0;
 	border: 0;
