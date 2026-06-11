@@ -8,3 +8,11 @@ allowBuilds:
   tree-sitter-typescript: false
   esbuild: true
   sharp: true
+
+# 公開から 3 日（4320 分）未満のバージョンはインストールを拒否する。サプライチェーンの
+# 待機期間: 汚染・撤回されたリリースが出回っても、入れる前に検知される猶予を作る。
+# Dependabot の cooldown（.github/dependabot.yml）も同じ 3 日に揃え、ポリシーが拒否する
+# ほど新しいバージョンを提案しないようにする。
+minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - commitlint-config-agent-coauthor@1.0.0
